@@ -15,6 +15,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(threepp)
 
 add_subdirectory(external)
+add_subdirectory(src)
 
-add_executable(kinematics_demo main.cpp)
 target_link_libraries(kinematics_demo PRIVATE threepp::threepp imgui::imgui)
