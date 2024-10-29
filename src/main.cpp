@@ -225,7 +225,7 @@ int main() {
     link3->position.y = -lengthLink3 / 2.0f; // Position link3 between joint3 and sphere
     sphere->position.y = -lengthLink3; // Position the sphere at the end of link3
 
-    // Animation loop
+    // Animation loop idk
     Clock clock;
     canvas.animate([&]() {
         renderer.render(scene, camera);
