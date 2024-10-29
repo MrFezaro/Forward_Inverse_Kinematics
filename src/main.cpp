@@ -1,6 +1,6 @@
 #include "threepp/threepp.hpp"
-
 #include "threepp/extras/imgui/ImguiContext.hpp"
+
 
 using namespace threepp;
 
@@ -48,10 +48,12 @@ int main() {
     BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
     auto joint1 = createJoint(jointParams, Color::green);
     auto joint2 = createJoint(jointParams, Color::red);
+    auto joint3 = createJoint(jointParams, Color::blue); // New joint at the end of the arm
 
     // Create links (cylinders)
     auto link1 = createLink(1.0f, 0.125f, Color::yellow);
     auto link2 = createLink(1.0f, 0.125f, Color::yellow);
+    auto link3 = createLink(1.0f, 0.125f, Color::yellow); // New link at the end of the arm
 
     // Attach joints hierarchically
     base->add(joint1);
@@ -68,56 +70,69 @@ int main() {
     link2->rotation.z = math::degToRad(90);// Rotate link2 to align with joint2
     link2->rotation.y = math::degToRad(90);// Rotate link2 to align with joint2
 
+    joint2->add(joint3);
+    joint3->add(link3);// Attach link3 between joint2 and joint3
+    joint3->position.y = -1.0f;
+    link3->position.y = -0.5f;             // Position link3 between joint2 and joint3
+    link3->rotation.z = math::degToRad(90);// Rotate link3 to align with joint3
+    link3->rotation.y = math::degToRad(90);// Rotate link3 to align with joint3
+
     // Create and attach a sphere to the end of joint3
     auto sphere = createSphere(0.3f, Color::white);// Sphere with radius 0.3
-    joint2->add(sphere);
+    joint3->add(sphere);
     sphere->position.y = -1.0f;// Position the sphere at the end of joint3
 
-// Initialize rotation and length parameters for each joint and link
-float angleJoint1 = 90.0f;
-float angleJoint2 = 90.0f;
-float angleJoint3 = 0.0f;
-float lengthLink1 = 1.5f;
-float lengthLink2 = 1.5f;
+    // Initialize rotation and length parameters for each joint and link
+    float angleJoint1 = 90.0f;
+    float angleJoint2 = 90.0f;
+    float angleJoint3 = 0.0f;
+    float lengthLink1 = 1.5f;
+    float lengthLink2 = 1.5f;
+    float lengthLink3 = 1.5f;
 
-bool paramsChanged = false;
-auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
-    ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
-    ImGui::SetNextWindowSize({320, 0}, 0);
-    ImGui::Begin("Joint Controls");
+    bool paramsChanged = false;
+    auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
+        ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
+        ImGui::SetNextWindowSize({320, 0}, 0);
+        ImGui::Begin("Joint Controls");
 
-    // Check if the mouse is over the ImGui window or any ImGui item is active
-    const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-    const bool isInteracting = ImGui::IsAnyItemActive();
+        // Check if the mouse is over the ImGui window or any ImGui item is active
+        const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+        const bool isInteracting = ImGui::IsAnyItemActive();
 
-    ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 180.0f);
-    paramsChanged = paramsChanged || ImGui::IsItemEdited();
-    ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 180.0f);
-    paramsChanged = paramsChanged || ImGui::IsItemEdited();
-    ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 180.0f);
-    paramsChanged = paramsChanged || ImGui::IsItemEdited();
-    ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.5f, 4.0f);
-    paramsChanged = paramsChanged || ImGui::IsItemEdited();
-    ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.5f, 4.0f);
-    paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.5f, 4.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.5f, 4.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.5f, 4.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
 
-    ImGui::End();
+        ImGui::End();
 
-    // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
-    controls.enabled = !(isHovered || isInteracting);
-});
+        // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
+        controls.enabled = !(isHovered || isInteracting);
+    });
 
     // Apply initial rotations and lengths to the joints and links
-    joint1->rotation.x = math::degToRad(angleJoint1 - 90.0f);
-    joint1->rotation.z = math::degToRad(angleJoint2 - 90.0f);
-    joint2->rotation.z = math::degToRad(angleJoint3);
+    joint1->rotation.z = math::degToRad(angleJoint1 - 90.0f);
+    joint2->rotation.z = math::degToRad(angleJoint2 - 90.0f);
+    joint3->rotation.z = math::degToRad(angleJoint3);
     link1->scale.y = lengthLink1;
     link2->scale.y = lengthLink2;
+    link3->scale.y = lengthLink3;
     joint1->position.y = -1.0f; // Fix joint1 position relative to the base
     link1->position.y = -lengthLink1 / 2.0f;
     joint2->position.y = -lengthLink1; // Position joint2 based on lengthLink1
     link2->position.y = -lengthLink2 / 2.0f; // Position link2 between joint2 and joint3
-    sphere->position.y = -lengthLink2; // Position the sphere at the end of link2
+    joint3->position.y = -lengthLink2; // Position joint3 based on lengthLink2
+    link3->position.y = -lengthLink3 / 2.0f; // Position link3 between joint3 and sphere
+    sphere->position.y = -lengthLink3; // Position the sphere at the end of link3
 
     // Animation loop
     Clock clock;
@@ -130,16 +145,19 @@ auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
             paramsChanged = false;
 
             // Apply rotations and lengths to the joints and links
-            joint1->rotation.x = math::degToRad(angleJoint1 - 90.0f);
-            joint1->rotation.z = math::degToRad(angleJoint2 - 90.0f);
-            joint2->rotation.z = math::degToRad(angleJoint3);
+            joint1->rotation.z = math::degToRad(angleJoint1 - 90.0f);
+            joint2->rotation.z = math::degToRad(angleJoint2 - 90.0f);
+            joint3->rotation.z = math::degToRad(angleJoint3);
             link1->scale.y = lengthLink1;
             link2->scale.y = lengthLink2;
+            link3->scale.y = lengthLink3;
             joint1->position.y = -1.0f; // Fix joint1 position relative to the base
             link1->position.y = -lengthLink1 / 2.0f;
             joint2->position.y = -lengthLink1; // Position joint2 based on lengthLink1
             link2->position.y = -lengthLink2 / 2.0f; // Position link2 between joint2 and joint3
-            sphere->position.y = -lengthLink2; // Position the sphere at the end of link2
+            joint3->position.y = -lengthLink2; // Position joint3 based on lengthLink2
+            link3->position.y = -lengthLink3 / 2.0f; // Position link3 between joint3 and sphere
+            sphere->position.y = -lengthLink3; // Position the sphere at the end of link3
         }
     });
 }
