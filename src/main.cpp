@@ -35,40 +35,39 @@ std::vector<std::vector<double>> matrixMultiply(const std::vector<std::vector<do
 }
 
 // Forward Kinematics: Given joint angles and link lengths, find end effector position
-Point forwardKinematics(double theta1, double theta2, double theta3, double L1, double L2, double L3) {
-    auto T1 = transformationMatrix(theta1, L1);
-    auto T2 = transformationMatrix(theta2, L2);
-    auto T3 = transformationMatrix(theta3, L3);
+Point forwardKinematics(const double theta1, const double theta2, const double theta3, const double L1, const double L2, const double L3) {
+    const auto T1 = transformationMatrix(theta1, L1);
+    const auto T2 = transformationMatrix(theta2, L2);
+    const auto T3 = transformationMatrix(theta3, L3);
 
     // Combine transformations
-    auto T12 = matrixMultiply(T1, T2);
-    auto T123 = matrixMultiply(T12, T3);
+    const auto T12 = matrixMultiply(T1, T2);
+    const auto T123 = matrixMultiply(T12, T3);
 
     // End effector position
     return {T123[0][2], T123[1][2]};
 }
 
 // Inverse Kinematics: Iterative solution to find joint angles for a desired position
-void inverseKinematics(Point target, double L1, double L2, double L3, double& theta1, double& theta2, double& theta3) {
-    double maxReach = L1 + L2 + L3;
-    double distanceToTarget = sqrt(target.x * target.x + target.y * target.y);
+void inverseKinematics(const Point target, const double L1, const double L2, const double L3, double& theta1, double& theta2, double& theta3) {
+    const double maxReach = L1 + L2 + L3;
 
-    if (distanceToTarget > maxReach) {
+    if (const double distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
         std::cerr << "Target position is outside the reachable workspace.\n";
         return;
     }
 
-    int maxIterations = 100;
+    constexpr int maxIterations = 1000;
 
     for (int i = 0; i < maxIterations; ++i) {
-        double learningRate = 0.01;
+        constexpr double learningRate = 0.01;
         // Current end effector position
-        Point endEffector = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
+        auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
         // Calculate the error
-        double errorX = target.x - endEffector.x;
-        double errorY = target.y - endEffector.y;
-        double error = sqrt(errorX * errorX + errorY * errorY);
+        const double errorX = target.x - x;
+        const double errorY = target.y - y;
+        const double error = sqrt(errorX * errorX + errorY * errorY);
 
         if (error < 1e-3) break; // Stop if close enough to target
 
@@ -185,15 +184,15 @@ int main() {
         }
 
         if (isForwardKinematics) {
-            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 180.0f);
+            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -360.0f, 360.0f);
             paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 180.0f);
+            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -360.0f, 360.0f);
             paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 180.0f);
+            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -360.0f, 360.0f);
             paramsChanged = paramsChanged || ImGui::IsItemEdited();
         } else {
-            float targetX = static_cast<float>(target.x);
-            float targetY = static_cast<float>(target.y);
+            auto targetX = static_cast<float>(target.x);
+            auto targetY = static_cast<float>(target.y);
             if (ImGui::SliderFloat("Target X", &targetX, -5.0f, 5.0f)) {
                 target.x = static_cast<double>(targetX);
                 paramsChanged = true;
@@ -211,7 +210,7 @@ int main() {
     });
 
     // Apply initial rotations and lengths to the joints and links
-    joint1->rotation.z = math::degToRad(angleJoint1);
+    joint1->rotation.z = math::degToRad(angleJoint1-90);
     joint2->rotation.z = math::degToRad(angleJoint2);
     joint3->rotation.z = math::degToRad(angleJoint3);
     link1->scale.y = lengthLink1;
@@ -237,7 +236,7 @@ int main() {
 
             if (isForwardKinematics) {
                 // Apply rotations to the joints
-                joint1->rotation.z = math::degToRad(angleJoint1);
+                joint1->rotation.z = math::degToRad(angleJoint1-90);
                 joint2->rotation.z = math::degToRad(angleJoint2);
                 joint3->rotation.z = math::degToRad(angleJoint3);
             } else {
@@ -253,7 +252,7 @@ int main() {
                 angleJoint3 = theta3 * (180.0 / PI);
 
                 // Apply rotations to the joints
-                joint1->rotation.z = math::degToRad(angleJoint1);
+                joint1->rotation.z = math::degToRad(angleJoint1-90);
                 joint2->rotation.z = math::degToRad(angleJoint2);
                 joint3->rotation.z = math::degToRad(angleJoint3);
             }
