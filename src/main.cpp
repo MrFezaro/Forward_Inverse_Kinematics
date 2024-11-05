@@ -12,7 +12,7 @@ struct Point {
 };
 
 // Transformation matrix function
-std::vector<std::vector<float>> transformationMatrix(float angle, float length) {
+std::vector<std::vector<float>> transformationMatrix(const float angle, const float length) {
     return {
             {cos(angle), -sin(angle), length * cos(angle)},
             {sin(angle), cos(angle), length * sin(angle)},
@@ -48,7 +48,7 @@ Point forwardKinematics(const float theta1, const float theta2, const float thet
 }
 
 // Inverse Kinematics using CCD: Iterative solution to find joint angles for a desired position
-bool inverseKinematicsCCD(Point target, float L1, float L2, float L3, float &theta1, float &theta2, float &theta3) {
+bool inverseKinematicsCCD(const Point target, const float L1, const float L2, const float L3, float &theta1, float &theta2, float &theta3) {
     const float maxReach = L1 + L2 + L3;
 
     if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
@@ -57,45 +57,47 @@ bool inverseKinematicsCCD(Point target, float L1, float L2, float L3, float &the
     }
 
     constexpr int maxIterations = 100;
-    constexpr float tolerance = 1e-3f;
 
     for (int iter = 0; iter < maxIterations; ++iter) {
+        constexpr float tolerance = 1e-3f;
         // Current end effector position
         auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
         // Calculate the error
         const float errorX = target.x - x;
         const float errorY = target.y - y;
-        const float error = sqrt(errorX * errorX + errorY * errorY);
 
-        if (error < tolerance) return true; // Stop if close enough to target
+        if (const float error = sqrt(errorX * errorX + errorY * errorY); error < tolerance) return true;// Stop if close enough to target
 
         // Adjust each joint angle in reverse order
         for (int joint = 2; joint >= 0; --joint) {
-            float &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2 : theta3;
+            float &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2
+                                                                : theta3;
             auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
             // Calculate the vector from the joint to the end effector
-            float jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1) : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
-            float jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1) : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
+            const float jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1)
+                                                                 : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
+            const float jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1)
+                                                                 : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
 
-            float endEffectorX = x;
-            float endEffectorY = y;
+            const float endEffectorX = x;
+            const float endEffectorY = y;
 
             // Calculate the vector from the joint to the target
-            float targetX = target.x - jointX;
-            float targetY = target.y - jointY;
+            const float targetX = target.x - jointX;
+            const float targetY = target.y - jointY;
 
             // Calculate the angle between the two vectors
-            float angleToTarget = atan2(targetY, targetX);
-            float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
+            const float angleToTarget = atan2(targetY, targetX);
+            const float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
 
             // Adjust the joint angle
             theta += angleToTarget - angleToEndEffector;
         }
     }
 
-    return false; // Return false if the error is not small enough after maxIterations
+    return false;// Return false if the error is not small enough after maxIterations
 }
 
 float normalizeAngle(float angle) {
@@ -193,52 +195,52 @@ int main() {
     float lengthLink3 = 2.0f;
 
     bool paramsChanged = false;
-    bool isForwardKinematics = true;       // Variable to track the current mode
-    Point target = {0.0f, 0.0f};           // Target position for inverse kinematics
+    bool isForwardKinematics = true;         // Variable to track the current mode
+    Point target = {0.0f, 0.0f};             // Target position for inverse kinematics
     Point endEffectorPosition = {0.0f, 0.0f};// Variable to store the end effector position
 
     auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
-    ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
-    ImGui::SetNextWindowSize({320, 0}, 0);
-    ImGui::Begin("Joint Controls");
+        ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
+        ImGui::SetNextWindowSize({320, 0}, 0);
+        ImGui::Begin("Joint Controls");
 
-    // Check if the mouse is over the ImGui window or any ImGui item is active
-    const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-    const bool isInteracting = ImGui::IsAnyItemActive();
+        // Check if the mouse is over the ImGui window or any ImGui item is active
+        const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+        const bool isInteracting = ImGui::IsAnyItemActive();
 
-    if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
-        isForwardKinematics = !isForwardKinematics;
-        if (!isForwardKinematics) {
-            target = endEffectorPosition;
-            paramsChanged = true;
+        if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
+            isForwardKinematics = !isForwardKinematics;
+            if (!isForwardKinematics) {
+                target = endEffectorPosition;
+                paramsChanged = true;
+            }
         }
-    }
 
-    if (isForwardKinematics) {
-        ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -180.0f, 180.0f);
-        paramsChanged = paramsChanged || ImGui::IsItemEdited();
-        ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -180.0f, 180.0f);
-        paramsChanged = paramsChanged || ImGui::IsItemEdited();
-        ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -180.0f, 180.0f);
-        paramsChanged = paramsChanged || ImGui::IsItemEdited();
-    } else {
-        auto targetX = static_cast<float>(target.x);
-        auto targetY = static_cast<float>(target.y);
-        if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-            target.x = static_cast<float>(targetX);
-            paramsChanged = true;
+        if (isForwardKinematics) {
+            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -180.0f, 180.0f);
+            paramsChanged = paramsChanged || ImGui::IsItemEdited();
+            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -180.0f, 180.0f);
+            paramsChanged = paramsChanged || ImGui::IsItemEdited();
+            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -180.0f, 180.0f);
+            paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        } else {
+            auto targetX = static_cast<float>(target.x);
+            auto targetY = static_cast<float>(target.y);
+            if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
+                target.x = static_cast<float>(targetX);
+                paramsChanged = true;
+            }
+            if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
+                target.y = static_cast<float>(targetY);
+                paramsChanged = true;
+            }
         }
-        if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-            target.y = static_cast<float>(targetY);
-            paramsChanged = true;
-        }
-    }
 
-    ImGui::End();
+        ImGui::End();
 
-    // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
-    controls.enabled = !(isHovered || isInteracting);
-});
+        // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
+        controls.enabled = !(isHovered || isInteracting);
+    });
 
     // Apply initial rotations and lengths to the joints and links
     joint1->rotation.z = math::degToRad(angleJoint1);
