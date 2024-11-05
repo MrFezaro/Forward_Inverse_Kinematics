@@ -1,8 +1,8 @@
-#include "threepp/threepp.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
+#include "threepp/threepp.hpp"
 #include <cmath>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 constexpr double PI = 3.14159265358979323846;
 
@@ -14,15 +14,14 @@ struct Point {
 // Transformation matrix function
 std::vector<std::vector<double>> transformationMatrix(double angle, double length) {
     return {
-        {cos(angle), -sin(angle), length * cos(angle)},
-        {sin(angle), cos(angle), length * sin(angle)},
-        {0, 0, 1}
-    };
+            {cos(angle), -sin(angle), length * cos(angle)},
+            {sin(angle), cos(angle), length * sin(angle)},
+            {0, 0, 1}};
 }
 
 // Multiply two 3x3 matrices
-std::vector<std::vector<double>> matrixMultiply(const std::vector<std::vector<double>>& A,
-                                                const std::vector<std::vector<double>>& B) {
+std::vector<std::vector<double>> matrixMultiply(const std::vector<std::vector<double>> &A,
+                                                const std::vector<std::vector<double>> &B) {
     std::vector<std::vector<double>> result(3, std::vector<double>(3, 0));
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -48,19 +47,19 @@ Point forwardKinematics(const double theta1, const double theta2, const double t
     return {T123[0][2], T123[1][2]};
 }
 
-// Inverse Kinematics: Iterative solution to find joint angles for a desired position
-void inverseKinematics(const Point target, const double L1, const double L2, const double L3, double& theta1, double& theta2, double& theta3) {
+// Inverse Kinematics using CCD: Iterative solution to find joint angles for a desired position
+bool inverseKinematicsCCD(Point target, double L1, double L2, double L3, double &theta1, double &theta2, double &theta3) {
     const double maxReach = L1 + L2 + L3;
 
     if (const double distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
         std::cerr << "Target position is outside the reachable workspace.\n";
-        return;
+        return false;
     }
 
-    constexpr int maxIterations = 1000;
+    constexpr int maxIterations = 100;
+    constexpr double tolerance = 1e-3;
 
-    for (int i = 0; i < maxIterations; ++i) {
-        constexpr double learningRate = 0.01;
+    for (int iter = 0; iter < maxIterations; ++iter) {
         // Current end effector position
         auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
@@ -69,13 +68,34 @@ void inverseKinematics(const Point target, const double L1, const double L2, con
         const double errorY = target.y - y;
         const double error = sqrt(errorX * errorX + errorY * errorY);
 
-        if (error < 1e-3) break; // Stop if close enough to target
+        if (error < tolerance) return true; // Stop if close enough to target
 
-        // Adjust angles by gradient descent
-        theta1 += learningRate * errorX;
-        theta2 += learningRate * errorY;
-        theta3 += learningRate * errorY;
+        // Adjust each joint angle in reverse order
+        for (int joint = 2; joint >= 0; --joint) {
+            double &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2 : theta3;
+            auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
+
+            // Calculate the vector from the joint to the end effector
+            double jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1) : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
+            double jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1) : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
+
+            double endEffectorX = x;
+            double endEffectorY = y;
+
+            // Calculate the vector from the joint to the target
+            double targetX = target.x - jointX;
+            double targetY = target.y - jointY;
+
+            // Calculate the angle between the two vectors
+            double angleToTarget = atan2(targetY, targetX);
+            double angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
+
+            // Adjust the joint angle
+            theta += angleToTarget - angleToEndEffector;
+        }
     }
+
+    return false; // Return false if the error is not small enough after maxIterations
 }
 
 using namespace threepp;
@@ -124,12 +144,12 @@ int main() {
     BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
     auto joint1 = createJoint(jointParams, Color::green);
     auto joint2 = createJoint(jointParams, Color::red);
-    auto joint3 = createJoint(jointParams, Color::blue); // New joint at the end of the arm
+    auto joint3 = createJoint(jointParams, Color::blue);// New joint at the end of the arm
 
     // Create links (cylinders)
     auto link1 = createLink(1.0f, 0.125f, Color::yellow);
     auto link2 = createLink(1.0f, 0.125f, Color::yellow);
-    auto link3 = createLink(1.0f, 0.125f, Color::yellow); // New link at the end of the arm
+    auto link3 = createLink(1.0f, 0.125f, Color::yellow);// New link at the end of the arm
 
     // Attach joints hierarchically
     base->add(joint1);
@@ -167,64 +187,69 @@ int main() {
     float lengthLink3 = 2.0f;
 
     bool paramsChanged = false;
-    bool isForwardKinematics = true; // Variable to track the current mode
-    Point target = {0.0, 0.0}; // Target position for inverse kinematics
+    bool isForwardKinematics = true;       // Variable to track the current mode
+    Point target = {0.0, 0.0};             // Target position for inverse kinematics
+    Point endEffectorPosition = {0.0, 0.0};// Variable to store the end effector position
 
     auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
-        ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
-        ImGui::SetNextWindowSize({320, 0}, 0);
-        ImGui::Begin("Joint Controls");
+    ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
+    ImGui::SetNextWindowSize({320, 0}, 0);
+    ImGui::Begin("Joint Controls");
 
-        // Check if the mouse is over the ImGui window or any ImGui item is active
-        const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-        const bool isInteracting = ImGui::IsAnyItemActive();
+    // Check if the mouse is over the ImGui window or any ImGui item is active
+    const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+    const bool isInteracting = ImGui::IsAnyItemActive();
 
-        if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
-            isForwardKinematics = !isForwardKinematics;
+    if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
+        isForwardKinematics = !isForwardKinematics;
+        if (!isForwardKinematics) {
+            target = endEffectorPosition;
+            paramsChanged = true;
         }
+    }
 
-        if (isForwardKinematics) {
-            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -360.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -360.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -360.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-        } else {
-            auto targetX = static_cast<float>(target.x);
-            auto targetY = static_cast<float>(target.y);
-            if (ImGui::SliderFloat("Target X", &targetX, -5.0f, 5.0f)) {
-                target.x = static_cast<double>(targetX);
-                paramsChanged = true;
-            }
-            if (ImGui::SliderFloat("Target Y", &targetY, -5.0f, 5.0f)) {
-                target.y = static_cast<double>(targetY);
-                paramsChanged = true;
-            }
+    if (isForwardKinematics) {
+        ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -180.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -180.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -180.0f, 180.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+    } else {
+        auto targetX = static_cast<float>(target.x);
+        auto targetY = static_cast<float>(target.y);
+        if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
+            target.x = static_cast<double>(targetX);
+            paramsChanged = true;
         }
+        if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
+            target.y = static_cast<double>(targetY);
+            paramsChanged = true;
+        }
+    }
 
-        ImGui::End();
+    ImGui::End();
 
-        // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
-        controls.enabled = !(isHovered || isInteracting);
-    });
+    // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
+    controls.enabled = !(isHovered || isInteracting);
+});
 
     // Apply initial rotations and lengths to the joints and links
-    joint1->rotation.z = math::degToRad(angleJoint1-90);
+    joint1->rotation.z = math::degToRad(angleJoint1);
     joint2->rotation.z = math::degToRad(angleJoint2);
     joint3->rotation.z = math::degToRad(angleJoint3);
     link1->scale.y = lengthLink1;
     link2->scale.y = lengthLink2;
     link3->scale.y = lengthLink3;
-    joint1->position.y = -1.0f; // Fix joint1 position relative to the base
+    joint1->position.y = -1.0f;// Fix joint1 position relative to the base
     link1->position.y = -lengthLink1 / 2.0f;
-    joint2->position.y = -lengthLink1; // Position joint2 based on lengthLink1
-    link2->position.y = -lengthLink2 / 2.0f; // Position link2 between joint2 and joint3
-    joint3->position.y = -lengthLink2; // Position joint3 based on lengthLink2
-    link3->position.y = -lengthLink3 / 2.0f; // Position link3 between joint3 and sphere
-    sphere->position.y = -lengthLink3; // Position the sphere at the end of link3
+    joint2->position.y = -lengthLink1;      // Position joint2 based on lengthLink1
+    link2->position.y = -lengthLink2 / 2.0f;// Position link2 between joint2 and joint3
+    joint3->position.y = -lengthLink2;      // Position joint3 based on lengthLink2
+    link3->position.y = -lengthLink3 / 2.0f;// Position link3 between joint3 and sphere
+    sphere->position.y = -lengthLink3;      // Position the sphere at the end of link3
 
-    // Animation loop idk
+    // Animation loop
     Clock clock;
     canvas.animate([&]() {
         renderer.render(scene, camera);
@@ -236,25 +261,31 @@ int main() {
 
             if (isForwardKinematics) {
                 // Apply rotations to the joints
-                joint1->rotation.z = math::degToRad(angleJoint1-90);
+                joint1->rotation.z = math::degToRad(angleJoint1);
                 joint2->rotation.z = math::degToRad(angleJoint2);
                 joint3->rotation.z = math::degToRad(angleJoint3);
+
+                // Calculate and store the end effector position
+                double theta1 = angleJoint1 * (PI / 180.0);
+                double theta2 = angleJoint2 * (PI / 180.0);
+                double theta3 = angleJoint3 * (PI / 180.0);
+                endEffectorPosition = forwardKinematics(theta1, theta2, theta3, lengthLink1, lengthLink2, lengthLink3);
             } else {
                 // Perform inverse kinematics to find angles
                 double theta1 = angleJoint1 * (PI / 180.0);
                 double theta2 = angleJoint2 * (PI / 180.0);
                 double theta3 = angleJoint3 * (PI / 180.0);
-                inverseKinematics(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3);
+                if (inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
+                    // Convert angles to degrees
+                    angleJoint1 = theta1 * (180.0 / PI);
+                    angleJoint2 = theta2 * (180.0 / PI);
+                    angleJoint3 = theta3 * (180.0 / PI);
 
-                // Convert angles to degrees
-                angleJoint1 = theta1 * (180.0 / PI);
-                angleJoint2 = theta2 * (180.0 / PI);
-                angleJoint3 = theta3 * (180.0 / PI);
-
-                // Apply rotations to the joints
-                joint1->rotation.z = math::degToRad(angleJoint1-90);
-                joint2->rotation.z = math::degToRad(angleJoint2);
-                joint3->rotation.z = math::degToRad(angleJoint3);
+                    // Apply rotations to the joints
+                    joint1->rotation.z = math::degToRad(angleJoint1);
+                    joint2->rotation.z = math::degToRad(angleJoint2);
+                    joint3->rotation.z = math::degToRad(angleJoint3);
+                }
             }
         }
     });
