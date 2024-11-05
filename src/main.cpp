@@ -98,6 +98,12 @@ bool inverseKinematicsCCD(Point target, double L1, double L2, double L3, double 
     return false; // Return false if the error is not small enough after maxIterations
 }
 
+double normalizeAngle(double angle) {
+    while (angle < 0) angle += 360;
+    while (angle >= 360) angle -= 360;
+    return angle;
+}
+
 using namespace threepp;
 
 namespace {
@@ -276,10 +282,10 @@ int main() {
                 double theta2 = angleJoint2 * (PI / 180.0);
                 double theta3 = angleJoint3 * (PI / 180.0);
                 if (inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
-                    // Convert angles to degrees
-                    angleJoint1 = theta1 * (180.0 / PI);
-                    angleJoint2 = theta2 * (180.0 / PI);
-                    angleJoint3 = theta3 * (180.0 / PI);
+                    // Convert angles to degrees and normalize
+                    angleJoint1 = normalizeAngle(theta1 * (180.0 / PI));
+                    angleJoint2 = normalizeAngle(theta2 * (180.0 / PI));
+                    angleJoint3 = normalizeAngle(theta3 * (180.0 / PI));
 
                     // Apply rotations to the joints
                     joint1->rotation.z = math::degToRad(angleJoint1);
