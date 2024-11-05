@@ -4,15 +4,15 @@
 #include <iostream>
 #include <vector>
 
-constexpr double PI = 3.14159265358979323846;
+constexpr float PI = 3.14159265358979323846f;
 
 // Structure for 2D points
 struct Point {
-    double x, y;
+    float x, y;
 };
 
 // Transformation matrix function
-std::vector<std::vector<double>> transformationMatrix(double angle, double length) {
+std::vector<std::vector<float>> transformationMatrix(float angle, float length) {
     return {
             {cos(angle), -sin(angle), length * cos(angle)},
             {sin(angle), cos(angle), length * sin(angle)},
@@ -20,9 +20,9 @@ std::vector<std::vector<double>> transformationMatrix(double angle, double lengt
 }
 
 // Multiply two 3x3 matrices
-std::vector<std::vector<double>> matrixMultiply(const std::vector<std::vector<double>> &A,
-                                                const std::vector<std::vector<double>> &B) {
-    std::vector<std::vector<double>> result(3, std::vector<double>(3, 0));
+std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A,
+                                               const std::vector<std::vector<float>> &B) {
+    std::vector<std::vector<float>> result(3, std::vector<float>(3, 0));
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             for (int k = 0; k < 3; ++k) {
@@ -34,7 +34,7 @@ std::vector<std::vector<double>> matrixMultiply(const std::vector<std::vector<do
 }
 
 // Forward Kinematics: Given joint angles and link lengths, find end effector position
-Point forwardKinematics(const double theta1, const double theta2, const double theta3, const double L1, const double L2, const double L3) {
+Point forwardKinematics(const float theta1, const float theta2, const float theta3, const float L1, const float L2, const float L3) {
     const auto T1 = transformationMatrix(theta1, L1);
     const auto T2 = transformationMatrix(theta2, L2);
     const auto T3 = transformationMatrix(theta3, L3);
@@ -48,47 +48,47 @@ Point forwardKinematics(const double theta1, const double theta2, const double t
 }
 
 // Inverse Kinematics using CCD: Iterative solution to find joint angles for a desired position
-bool inverseKinematicsCCD(Point target, double L1, double L2, double L3, double &theta1, double &theta2, double &theta3) {
-    const double maxReach = L1 + L2 + L3;
+bool inverseKinematicsCCD(Point target, float L1, float L2, float L3, float &theta1, float &theta2, float &theta3) {
+    const float maxReach = L1 + L2 + L3;
 
-    if (const double distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
+    if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
         std::cerr << "Target position is outside the reachable workspace.\n";
         return false;
     }
 
     constexpr int maxIterations = 100;
-    constexpr double tolerance = 1e-3;
+    constexpr float tolerance = 1e-3f;
 
     for (int iter = 0; iter < maxIterations; ++iter) {
         // Current end effector position
         auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
         // Calculate the error
-        const double errorX = target.x - x;
-        const double errorY = target.y - y;
-        const double error = sqrt(errorX * errorX + errorY * errorY);
+        const float errorX = target.x - x;
+        const float errorY = target.y - y;
+        const float error = sqrt(errorX * errorX + errorY * errorY);
 
         if (error < tolerance) return true; // Stop if close enough to target
 
         // Adjust each joint angle in reverse order
         for (int joint = 2; joint >= 0; --joint) {
-            double &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2 : theta3;
+            float &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2 : theta3;
             auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
 
             // Calculate the vector from the joint to the end effector
-            double jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1) : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
-            double jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1) : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
+            float jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1) : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
+            float jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1) : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
 
-            double endEffectorX = x;
-            double endEffectorY = y;
+            float endEffectorX = x;
+            float endEffectorY = y;
 
             // Calculate the vector from the joint to the target
-            double targetX = target.x - jointX;
-            double targetY = target.y - jointY;
+            float targetX = target.x - jointX;
+            float targetY = target.y - jointY;
 
             // Calculate the angle between the two vectors
-            double angleToTarget = atan2(targetY, targetX);
-            double angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
+            float angleToTarget = atan2(targetY, targetX);
+            float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
 
             // Adjust the joint angle
             theta += angleToTarget - angleToEndEffector;
@@ -98,7 +98,7 @@ bool inverseKinematicsCCD(Point target, double L1, double L2, double L3, double 
     return false; // Return false if the error is not small enough after maxIterations
 }
 
-double normalizeAngle(double angle) {
+float normalizeAngle(float angle) {
     while (angle < 0) angle += 360;
     while (angle >= 360) angle -= 360;
     return angle;
@@ -194,8 +194,8 @@ int main() {
 
     bool paramsChanged = false;
     bool isForwardKinematics = true;       // Variable to track the current mode
-    Point target = {0.0, 0.0};             // Target position for inverse kinematics
-    Point endEffectorPosition = {0.0, 0.0};// Variable to store the end effector position
+    Point target = {0.0f, 0.0f};           // Target position for inverse kinematics
+    Point endEffectorPosition = {0.0f, 0.0f};// Variable to store the end effector position
 
     auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
     ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
@@ -225,11 +225,11 @@ int main() {
         auto targetX = static_cast<float>(target.x);
         auto targetY = static_cast<float>(target.y);
         if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-            target.x = static_cast<double>(targetX);
+            target.x = static_cast<float>(targetX);
             paramsChanged = true;
         }
         if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-            target.y = static_cast<double>(targetY);
+            target.y = static_cast<float>(targetY);
             paramsChanged = true;
         }
     }
@@ -272,20 +272,20 @@ int main() {
                 joint3->rotation.z = math::degToRad(angleJoint3);
 
                 // Calculate and store the end effector position
-                double theta1 = angleJoint1 * (PI / 180.0);
-                double theta2 = angleJoint2 * (PI / 180.0);
-                double theta3 = angleJoint3 * (PI / 180.0);
+                float theta1 = angleJoint1 * (PI / 180.0f);
+                float theta2 = angleJoint2 * (PI / 180.0f);
+                float theta3 = angleJoint3 * (PI / 180.0f);
                 endEffectorPosition = forwardKinematics(theta1, theta2, theta3, lengthLink1, lengthLink2, lengthLink3);
             } else {
                 // Perform inverse kinematics to find angles
-                double theta1 = angleJoint1 * (PI / 180.0);
-                double theta2 = angleJoint2 * (PI / 180.0);
-                double theta3 = angleJoint3 * (PI / 180.0);
+                float theta1 = angleJoint1 * (PI / 180.0f);
+                float theta2 = angleJoint2 * (PI / 180.0f);
+                float theta3 = angleJoint3 * (PI / 180.0f);
                 if (inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
                     // Convert angles to degrees and normalize
-                    angleJoint1 = normalizeAngle(theta1 * (180.0 / PI));
-                    angleJoint2 = normalizeAngle(theta2 * (180.0 / PI));
-                    angleJoint3 = normalizeAngle(theta3 * (180.0 / PI));
+                    angleJoint1 = normalizeAngle(theta1 * (180.0f / PI));
+                    angleJoint2 = normalizeAngle(theta2 * (180.0f / PI));
+                    angleJoint3 = normalizeAngle(theta3 * (180.0f / PI));
 
                     // Apply rotations to the joints
                     joint1->rotation.z = math::degToRad(angleJoint1);

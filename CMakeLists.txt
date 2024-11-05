@@ -3,6 +3,8 @@ project(Forward_Inverse_Kinematics)
 
 set(CMAKE_CXX_STANDARD 20)
 
+option(PROJECT_BUILD_TESTS ON)
+
 include(FetchContent)
 
 set(THREEPP_BUILD_TESTS OFF)
@@ -14,7 +16,21 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(threepp)
 
+if(PROJECT_BUILD_TESTS)
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG v3.7.1
+    )
+    FetchContent_MakeAvailable(Catch2)
+
+    enable_testing()
+    add_subdirectory(tests)
+endif ()
+
 add_subdirectory(external)
 add_subdirectory(src)
 
 target_link_libraries(kinematics_demo PRIVATE threepp::threepp imgui::imgui)
+
+
