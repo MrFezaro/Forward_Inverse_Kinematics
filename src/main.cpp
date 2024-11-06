@@ -181,6 +181,7 @@ int main() {
     link3->rotation.z = math::degToRad(90);// Rotate link3 to align with joint3
     link3->rotation.y = math::degToRad(90);// Rotate link3 to align with joint3
 
+
     // Create and attach a sphere to the end of joint3
     auto sphere = createSphere(0.3f, Color::white);// Sphere with radius 0.3
     joint3->add(sphere);
@@ -200,47 +201,58 @@ int main() {
     Point endEffectorPosition = {0.0f, 0.0f};// Variable to store the end effector position
 
     auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
-        ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
-        ImGui::SetNextWindowSize({320, 0}, 0);
-        ImGui::Begin("Joint Controls");
+    ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
+    ImGui::SetNextWindowSize({320, 0}, 0);
+    ImGui::Begin("Joint Controls");
 
-        // Check if the mouse is over the ImGui window or any ImGui item is active
-        const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-        const bool isInteracting = ImGui::IsAnyItemActive();
+    // Check if the mouse is over the ImGui window or any ImGui item is active
+    const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+    const bool isInteracting = ImGui::IsAnyItemActive();
 
-        if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
-            isForwardKinematics = !isForwardKinematics;
-            if (!isForwardKinematics) {
-                target = endEffectorPosition;
-                paramsChanged = true;
-            }
+    if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
+        isForwardKinematics = !isForwardKinematics;
+        if (!isForwardKinematics) {
+            target = endEffectorPosition;
+            paramsChanged = true;
+        }
+    }
+
+    if (isForwardKinematics) {
+        ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 360.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 360.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+        ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 360.0f);
+        paramsChanged = paramsChanged || ImGui::IsItemEdited();
+
+        // Display the end effector position
+        ImGui::Text("End Effector Position:");
+        ImGui::Text("X: %.2f", endEffectorPosition.x);
+        ImGui::Text("Y: %.2f", endEffectorPosition.y);
+    } else {
+        auto targetX = static_cast<float>(target.x);
+        auto targetY = static_cast<float>(target.y);
+        if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
+            target.x = static_cast<float>(targetX);
+            paramsChanged = true;
+        }
+        if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
+            target.y = static_cast<float>(targetY);
+            paramsChanged = true;
         }
 
-        if (isForwardKinematics) {
-            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, -180.0f, 180.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, -180.0f, 180.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, -180.0f, 180.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-        } else {
-            auto targetX = static_cast<float>(target.x);
-            auto targetY = static_cast<float>(target.y);
-            if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-                target.x = static_cast<float>(targetX);
-                paramsChanged = true;
-            }
-            if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-                target.y = static_cast<float>(targetY);
-                paramsChanged = true;
-            }
-        }
+        // Display the calculated joint angles
+        ImGui::Text("Calculated Angles:");
+        ImGui::Text("Angle Joint 1: %.2f", angleJoint1);
+        ImGui::Text("Angle Joint 2: %.2f", angleJoint2);
+        ImGui::Text("Angle Joint 3: %.2f", angleJoint3);
+    }
 
-        ImGui::End();
+    ImGui::End();
 
-        // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
-        controls.enabled = !(isHovered || isInteracting);
-    });
+    // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
+    controls.enabled = !(isHovered || isInteracting);
+});
 
     // Apply initial rotations and lengths to the joints and links
     joint1->rotation.z = math::degToRad(angleJoint1);
@@ -282,8 +294,7 @@ int main() {
                 // Perform inverse kinematics to find angles
                 float theta1 = angleJoint1 * (PI / 180.0f);
                 float theta2 = angleJoint2 * (PI / 180.0f);
-                float theta3 = angleJoint3 * (PI / 180.0f);
-                if (inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
+                if (float theta3 = angleJoint3 * (PI / 180.0f); inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
                     // Convert angles to degrees and normalize
                     angleJoint1 = normalizeAngle(theta1 * (180.0f / PI));
                     angleJoint2 = normalizeAngle(theta2 * (180.0f / PI));
@@ -298,3 +309,4 @@ int main() {
         }
     });
 }
+//Hello Lars!

@@ -3,7 +3,7 @@ project(Forward_Inverse_Kinematics)
 
 set(CMAKE_CXX_STANDARD 20)
 
-option(PROJECT_BUILD_TESTS ON)
+option(PROJECT_BUILD_TESTS "test functions" ON)
 
 include(FetchContent)
 
@@ -15,6 +15,8 @@ FetchContent_Declare(
         GIT_TAG 2e2397e0b7f0e639f254ea3046b70e53a71f0387
 )
 FetchContent_MakeAvailable(threepp)
+
+message(PROJECT_BUILD_TESTS=${PROJECT_BUILD_TESTS})
 
 if(PROJECT_BUILD_TESTS)
     FetchContent_Declare(
