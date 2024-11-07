@@ -307,9 +307,9 @@ int main() {
                 joint3->rotation.z = math::degToRad(angleJoint3);
 
                 // Calculate and store the end effector position
-                float theta1 = angleJoint1 * (PI / 180.0f);
-                float theta2 = angleJoint2 * (PI / 180.0f);
-                float theta3 = angleJoint3 * (PI / 180.0f);
+                const float theta1 = angleJoint1 * (PI / 180.0f);
+                const float theta2 = angleJoint2 * (PI / 180.0f);
+                const float theta3 = angleJoint3 * (PI / 180.0f);
                 endEffectorPosition = forwardKinematics(theta1, theta2, theta3, lengthLink1, lengthLink2, lengthLink3);
             } else {
                 // Perform inverse kinematics to find angles
