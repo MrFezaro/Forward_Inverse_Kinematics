@@ -1,4 +1,4 @@
-# Forward and inverse kinematics simulator
+# Forward and Inverse Kinematics Simulator
 
 This is a simple example of how to use consume [threepp](https://github.com/markaren/threepp) using CMake's FetchContent.
 
