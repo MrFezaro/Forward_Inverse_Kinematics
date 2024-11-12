@@ -133,8 +133,8 @@ int main() {
 
             // Display the end effector position
             ImGui::Text("End Effector Position:");
-            ImGui::Text("X: %.2f", endEffectorPosition.x);
-            ImGui::Text("Y: %.2f", endEffectorPosition.y);
+            ImGui::Text("X: %.2f", endEffectorPosition.y * -1);//Sorry, I had to change this to get the correct output
+            ImGui::Text("Y: %.2f", endEffectorPosition.x * -1);//Sorry, I had to change this to get the correct output
         } else {
             auto targetX = target.x;
             auto targetY = target.y;
@@ -174,6 +174,18 @@ int main() {
         }
         if (ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.0f, 5.0f)) {
             setLinkLength(lengthLink3, lengthLink3, link3, sphere);
+            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
+            paramsChanged = true;
+        }
+
+        if (ImGui::Button("Reset")) {
+            angleJoint1 = 0.0f;
+            angleJoint2 = 0.0f;
+            angleJoint3 = 0.0f;
+            target = {6.0f, 0.0f};
+            setLinkLength(lengthLink1, 2.0f, link1, joint2);
+            setLinkLength(lengthLink2, 2.0f, link2, joint3);
+            setLinkLength(lengthLink3, 2.0f, link3, sphere);
             kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
