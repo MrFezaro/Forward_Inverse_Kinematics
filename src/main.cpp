@@ -6,34 +6,32 @@ constexpr float PI = 3.14159265358979323846f;
 
 using namespace threepp;
 
-namespace {
-    auto createJoint(const BoxGeometry::Params &params, const Color &color) {
-        const auto geometry = BoxGeometry::create(params);
-        const auto material = MeshBasicMaterial::create({{"color", color}});
-        return Mesh::create(geometry, material);
-    }
+auto createJoint(const BoxGeometry::Params &params, const Color &color) {
+    const auto geometry = BoxGeometry::create(params);
+    const auto material = MeshBasicMaterial::create({{"color", color}});
+    return Mesh::create(geometry, material);
+}
 
-    auto createLink(const float length, const float radius, const Color &color) {
-        const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
-        const auto material = MeshBasicMaterial::create({{"color", color}});
-        auto link = Mesh::create(geometry, material);
-        link->rotation.x = math::degToRad(90);// Align along Y axis
-        return link;
-    }
+auto createLink(const float length, const float radius, const Color &color) {
+    const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
+    const auto material = MeshBasicMaterial::create({{"color", color}});
+    auto link = Mesh::create(geometry, material);
+    link->rotation.x = math::degToRad(90);// Align along Y axis
+    return link;
+}
 
-    auto createSphere(const float radius, const Color &color) {
-        const auto geometry = SphereGeometry::create(radius, 32, 32);
-        const auto material = MeshBasicMaterial::create({{"color", color}});
-        return Mesh::create(geometry, material);
-    }
+auto createSphere(const float radius, const Color &color) {
+    const auto geometry = SphereGeometry::create(radius, 32, 32);
+    const auto material = MeshBasicMaterial::create({{"color", color}});
+    return Mesh::create(geometry, material);
+}
 
-    void setModelLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
-        linkLength = newLength;
-        link->scale.y = newLength;
-        link->position.y = -newLength / 2.0f;
-        joint->position.y = -newLength;
-    }
-}// namespace
+void setLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
+    linkLength = newLength;
+    link->scale.y = newLength;
+    link->position.y = -newLength / 2.0f;
+    joint->position.y = -newLength;
+}
 
 int main() {
     Canvas canvas("Forward and inverse kinematic test", {{"aa", 8}});
@@ -51,18 +49,18 @@ int main() {
     auto base = createJoint(baseParams, Color::white);
     scene.add(base);
     base->position.y = 2.0f;
-    base->rotation.y = math::degToRad(180);// Rotate base to align with the world
+    base->rotation.y = math::degToRad(180);// Rotate base to align with world
 
     // Create joints
     BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
     auto joint1 = createJoint(jointParams, Color::green);
     auto joint2 = createJoint(jointParams, Color::red);
-    auto joint3 = createJoint(jointParams, Color::blue);// New joint at the end of the arm
+    auto joint3 = createJoint(jointParams, Color::blue);
 
     // Create links (cylinders)
     auto link1 = createLink(1.0f, 0.125f, Color::yellow);
     auto link2 = createLink(1.0f, 0.125f, Color::yellow);
-    auto link3 = createLink(1.0f, 0.125f, Color::yellow);// New link at the end of the arm
+    auto link3 = createLink(1.0f, 0.125f, Color::yellow);
 
     // Attach joints hierarchically
     base->add(joint1);
@@ -73,15 +71,15 @@ int main() {
     link1->rotation.y = math::degToRad(90);// Rotate link1 to align with joint1
 
     joint1->add(joint2);
-    joint2->add(link2);// Attach link2 between joint1 and joint2
-    joint2->position.y = -1.0f;
+    joint2->add(link2);                    // Attach link2 between joint1 and joint2
+    joint2->position.y = -1.0f;            // Position joint2 between joint1 and joint3
     link2->position.y = -0.5f;             // Position link2 between joint1 and joint2
     link2->rotation.z = math::degToRad(90);// Rotate link2 to align with joint2
     link2->rotation.y = math::degToRad(90);// Rotate link2 to align with joint2
 
     joint2->add(joint3);
-    joint3->add(link3);// Attach link3 between joint2 and joint3
-    joint3->position.y = -1.0f;
+    joint3->add(link3);                    // Attach link3 between joint2 and joint3
+    joint3->position.y = -1.0f;            // Position joint3 between joint2 and sphere
     link3->position.y = -0.5f;             // Position link3 between joint2 and joint3
     link3->rotation.z = math::degToRad(90);// Rotate link3 to align with joint3
     link3->rotation.y = math::degToRad(90);// Rotate link3 to align with joint3
@@ -154,21 +152,28 @@ int main() {
             ImGui::Text("Angle Joint 1: %.2f", angleJoint1);
             ImGui::Text("Angle Joint 2: %.2f", angleJoint2);
             ImGui::Text("Angle Joint 3: %.2f", angleJoint3);
+
+            // Check if the target is out of bounds
+            const float maxReach = lengthLink1 + lengthLink2 + lengthLink3;
+            const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y);
+            if (distanceToTarget > maxReach) {
+                ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
+            }
         }
 
         // Add sliders to change the lengths of the links
         if (ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.0f, 5.0f)) {
-            setModelLinkLength(lengthLink1, lengthLink1, link1, joint2);
+            setLinkLength(lengthLink1, lengthLink1, link1, joint2);
             kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
         if (ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.0f, 5.0f)) {
-            setModelLinkLength(lengthLink2, lengthLink2, link2, joint3);
+            setLinkLength(lengthLink2, lengthLink2, link2, joint3);
             kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
         if (ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.0f, 5.0f)) {
-            setModelLinkLength(lengthLink3, lengthLink3, link3, sphere);
+            setLinkLength(lengthLink3, lengthLink3, link3, sphere);
             kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
