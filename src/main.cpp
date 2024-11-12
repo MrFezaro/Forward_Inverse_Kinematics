@@ -1,110 +1,8 @@
+#include "kinematicChain.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
 #include "threepp/threepp.hpp"
-#include <cmath>
-#include <iostream>
-#include <vector>
 
 constexpr float PI = 3.14159265358979323846f;
-
-// Structure for 2D points
-struct Point {
-    float x, y;
-};
-
-// Transformation matrix function
-std::vector<std::vector<float>> transformationMatrix(const float angle, const float length) {
-    return {
-            {cos(angle), -sin(angle), length * cos(angle)},
-            {sin(angle), cos(angle), length * sin(angle)},
-            {0, 0, 1}};
-}
-
-// Multiply two 3x3 matrices
-std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A,
-                                               const std::vector<std::vector<float>> &B) {
-    std::vector<std::vector<float>> result(3, std::vector<float>(3, 0));
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            for (int k = 0; k < 3; ++k) {
-                result[i][j] += A[i][k] * B[k][j];
-            }
-        }
-    }
-    return result;
-}
-
-// Forward Kinematics: Given joint angles and link lengths, find end effector position
-Point forwardKinematics(const float theta1, const float theta2, const float theta3, const float L1, const float L2, const float L3) {
-    const auto T1 = transformationMatrix(theta1, L1);
-    const auto T2 = transformationMatrix(theta2, L2);
-    const auto T3 = transformationMatrix(theta3, L3);
-
-    // Combine transformations
-    const auto T12 = matrixMultiply(T1, T2);
-    const auto T123 = matrixMultiply(T12, T3);
-
-    // End effector position
-    return {T123[0][2], T123[1][2]};
-}
-
-// Inverse Kinematics using CCD: Iterative solution to find joint angles for a desired position
-bool inverseKinematicsCCD(const Point target, const float L1, const float L2, const float L3, float &theta1, float &theta2, float &theta3) {
-    const float maxReach = L1 + L2 + L3;
-
-    if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
-        std::cerr << "Target position is outside the reachable workspace.\n";
-        return false;
-    }
-
-    constexpr int maxIterations = 100;
-
-    for (int iter = 0; iter < maxIterations; ++iter) {
-        constexpr float tolerance = 1e-3f;
-        // Current end effector position
-        auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
-
-        // Calculate the error
-        const float errorX = target.x - x;
-        const float errorY = target.y - y;
-
-        if (const float error = sqrt(errorX * errorX + errorY * errorY); error < tolerance) return true;// Stop if close enough to target
-
-        // Adjust each joint angle in reverse order
-        for (int joint = 2; joint >= 0; --joint) {
-            float &theta = (joint == 0) ? theta1 : (joint == 1) ? theta2
-                                                                : theta3;
-            auto [x, y] = forwardKinematics(theta1, theta2, theta3, L1, L2, L3);
-
-            // Calculate the vector from the joint to the end effector
-            const float jointX = (joint == 0) ? 0 : (joint == 1) ? L1 * cos(theta1)
-                                                                 : L1 * cos(theta1) + L2 * cos(theta1 + theta2);
-            const float jointY = (joint == 0) ? 0 : (joint == 1) ? L1 * sin(theta1)
-                                                                 : L1 * sin(theta1) + L2 * sin(theta1 + theta2);
-
-            const float endEffectorX = x;
-            const float endEffectorY = y;
-
-            // Calculate the vector from the joint to the target
-            const float targetX = target.x - jointX;
-            const float targetY = target.y - jointY;
-
-            // Calculate the angle between the two vectors
-            const float angleToTarget = atan2(targetY, targetX);
-            const float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
-
-            // Adjust the joint angle
-            theta += angleToTarget - angleToEndEffector;
-        }
-    }
-
-    return false;// Return false if the error is not small enough after maxIterations
-}
-
-float normalizeAngle(float angle) {
-    while (angle < 0) angle += 360;
-    while (angle >= 360) angle -= 360;
-    return angle;
-}
 
 using namespace threepp;
 
@@ -129,7 +27,7 @@ namespace {
         return Mesh::create(geometry, material);
     }
 
-    void setLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
+    void setModelLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
         linkLength = newLength;
         link->scale.y = newLength;
         link->position.y = -newLength / 2.0f;
@@ -204,8 +102,11 @@ int main() {
 
     bool paramsChanged = false;
     bool isForwardKinematics = true;         // Variable to track the current mode
-    Point target = {0.0f, 0.0f};             // Target position for inverse kinematics
-    Point endEffectorPosition = {0.0f, 0.0f};// Variable to store the end effector position
+    Point target = {6.0f, 0.0f};             // Target position for inverse kinematics
+    Point endEffectorPosition = {6.0f, 0.0f};// Variable to store the end effector position
+
+    // Initialize the kinematic chain with link lengths
+    kinematicChain kinematicChain(lengthLink1, lengthLink2, lengthLink3);
 
     auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
         ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
@@ -237,14 +138,14 @@ int main() {
             ImGui::Text("X: %.2f", endEffectorPosition.x);
             ImGui::Text("Y: %.2f", endEffectorPosition.y);
         } else {
-            auto targetX = static_cast<float>(target.x);
-            auto targetY = static_cast<float>(target.y);
+            auto targetX = target.x;
+            auto targetY = target.y;
             if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-                target.x = static_cast<float>(targetX);
+                target.x = targetX;
                 paramsChanged = true;
             }
             if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-                target.y = static_cast<float>(targetY);
+                target.y = targetY;
                 paramsChanged = true;
             }
 
@@ -257,15 +158,18 @@ int main() {
 
         // Add sliders to change the lengths of the links
         if (ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink1, lengthLink1, link1, joint2);
+            setModelLinkLength(lengthLink1, lengthLink1, link1, joint2);
+            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
         if (ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink2, lengthLink2, link2, joint3);
+            setModelLinkLength(lengthLink2, lengthLink2, link2, joint3);
+            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
         if (ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink3, lengthLink3, link3, sphere);
+            setModelLinkLength(lengthLink3, lengthLink3, link3, sphere);
+            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
             paramsChanged = true;
         }
 
@@ -310,16 +214,17 @@ int main() {
                 const float theta1 = angleJoint1 * (PI / 180.0f);
                 const float theta2 = angleJoint2 * (PI / 180.0f);
                 const float theta3 = angleJoint3 * (PI / 180.0f);
-                endEffectorPosition = forwardKinematics(theta1, theta2, theta3, lengthLink1, lengthLink2, lengthLink3);
+                endEffectorPosition = kinematicChain.forwardKinematics(theta1, theta2, theta3);
             } else {
                 // Perform inverse kinematics to find angles
                 float theta1 = angleJoint1 * (PI / 180.0f);
                 float theta2 = angleJoint2 * (PI / 180.0f);
-                if (float theta3 = angleJoint3 * (PI / 180.0f); inverseKinematicsCCD(target, lengthLink1, lengthLink2, lengthLink3, theta1, theta2, theta3)) {
+                float theta3 = angleJoint3 * (PI / 180.0f);
+                if (kinematicChain.inverseKinematicsCCD(target, theta1, theta2, theta3)) {
                     // Convert angles to degrees and normalize
-                    angleJoint1 = normalizeAngle(theta1 * (180.0f / PI));
-                    angleJoint2 = normalizeAngle(theta2 * (180.0f / PI));
-                    angleJoint3 = normalizeAngle(theta3 * (180.0f / PI));
+                    angleJoint1 = kinematicChain::normalizeAngle(theta1 * (180.0f / PI));
+                    angleJoint2 = kinematicChain::normalizeAngle(theta2 * (180.0f / PI));
+                    angleJoint3 = kinematicChain::normalizeAngle(theta3 * (180.0f / PI));
 
                     // Apply rotations to the joints
                     joint1->rotation.z = math::degToRad(angleJoint1);
@@ -330,4 +235,3 @@ int main() {
         }
     });
 }
-//Hello Lars!

@@ -18,7 +18,7 @@ FetchContent_MakeAvailable(threepp)
 
 message(PROJECT_BUILD_TESTS=${PROJECT_BUILD_TESTS})
 
-if(PROJECT_BUILD_TESTS)
+if (PROJECT_BUILD_TESTS)
     FetchContent_Declare(
             Catch2
             GIT_REPOSITORY https://github.com/catchorg/Catch2.git

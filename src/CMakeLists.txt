@@ -1,2 +1,2 @@
-add_executable(kinematics_demo "main.cpp")
+add_executable(kinematics_demo "main.cpp" "kinematicChain.cpp")
 target_include_directories(kinematics_demo PUBLIC "${CMAKE_SOURCE_DIR}/include")
