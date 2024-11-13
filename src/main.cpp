@@ -1,38 +1,11 @@
+#include "geometryHelpers.hpp"
 #include "kinematicChain.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
 #include "threepp/threepp.hpp"
-#include <cmath>
 
 constexpr float PI = 3.14159265358979323846f;
 
 using namespace threepp;
-
-auto createJoint(const BoxGeometry::Params &params, const Color &color) {
-    const auto geometry = BoxGeometry::create(params);
-    const auto material = MeshBasicMaterial::create({{"color", color}});
-    return Mesh::create(geometry, material);
-}
-
-auto createLink(const float length, const float radius, const Color &color) {
-    const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
-    const auto material = MeshBasicMaterial::create({{"color", color}});
-    auto link = Mesh::create(geometry, material);
-    link->rotation.x = math::degToRad(90);// Align along Y axis
-    return link;
-}
-
-auto createSphere(const float radius, const Color &color) {
-    const auto geometry = SphereGeometry::create(radius, 32, 32);
-    const auto material = MeshBasicMaterial::create({{"color", color}});
-    return Mesh::create(geometry, material);
-}
-
-void setLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
-    linkLength = newLength;
-    link->scale.y = newLength;
-    link->position.y = -newLength / 2.0f;
-    joint->position.y = -newLength;
-}
 
 int main() {
     Canvas canvas("Forward and inverse kinematic test", {{"aa", 8}});
@@ -154,10 +127,7 @@ int main() {
             ImGui::Text("Angle Joint 2: %.2f", angleJoint2);
             ImGui::Text("Angle Joint 3: %.2f", angleJoint3);
 
-            // Check if the target is out of bounds
-            const float maxReach = lengthLink1 + lengthLink2 + lengthLink3;
-            const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y);
-            if (distanceToTarget > maxReach) {
+            if (!kinematicChain.inverseKinematicsCCD(target, angleJoint1, angleJoint2, angleJoint3)) {
                 ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
             }
         }

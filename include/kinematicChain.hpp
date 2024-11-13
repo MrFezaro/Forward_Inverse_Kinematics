@@ -14,10 +14,10 @@ public:
     [[nodiscard]] Point forwardKinematics(float theta1, float theta2, float theta3) const;
     bool inverseKinematicsCCD(const Point &target, float &theta1, float &theta2, float &theta3) const;
     [[nodiscard]] static float normalizeAngle(float angle);
-
     void updateLinkLengths(float newL1, float newL2, float newL3);
 
 private:
+    // const float PI = 3.14159265358979323846f;
     float L1, L2, L3;
 
     [[nodiscard]] static std::vector<std::vector<float>> transformationMatrix(float angle, float length);

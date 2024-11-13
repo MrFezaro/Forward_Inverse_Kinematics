@@ -33,6 +33,5 @@ endif ()
 add_subdirectory(external)
 add_subdirectory(src)
 
+# Link the necessary libraries
 target_link_libraries(kinematics_demo PRIVATE threepp::threepp imgui::imgui)
-
-

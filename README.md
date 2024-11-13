@@ -1,6 +1,8 @@
 # Forward- and Inverse Kinematics of a 3-DOF arm
 #### Candidate Number: 10053
 
+[ADD GIF HERE]
+
 ## Overview
 This project aims to simulate the forward and inverse kinematics of a 3-DOF (Degree of Freedom) robotic arm using the threepp library. It provides a visual representation and control interface for manipulating the arm's joints and links.
 

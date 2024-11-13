@@ -37,11 +37,10 @@ bool kinematicChain::inverseKinematicsCCD(const Point &target, float &theta1, fl
     const float maxReach = L1 + L2 + L3;
 
     if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
-        // Throw exception?
         return false;
     }
 
-    constexpr int maxIterations = 100;
+    constexpr int maxIterations = 1000;
 
     for (int iter = 0; iter < maxIterations; ++iter) {
         constexpr float tolerance = 1e-3f;
