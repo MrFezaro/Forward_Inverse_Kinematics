@@ -1,5 +1,5 @@
 #include "kinematicChain.hpp"
-#include <iostream>
+#include <cmath>
 
 kinematicChain::kinematicChain(const float L1, const float L2, const float L3) : L1(L1), L2(L2), L3(L3) {}
 

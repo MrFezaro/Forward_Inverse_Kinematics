@@ -1,6 +1,7 @@
 #include "kinematicChain.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
 #include "threepp/threepp.hpp"
+#include <cmath>
 
 constexpr float PI = 3.14159265358979323846f;
 
