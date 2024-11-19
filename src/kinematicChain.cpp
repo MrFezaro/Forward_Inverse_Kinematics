@@ -1,7 +1,7 @@
 #include "kinematicChain.hpp"
 #include <cmath>
 
-kinematicChain::kinematicChain() : linkLengths{2.0f, 2.0f, 2.0f}, jointAngles{0.0f, 0.0f, 0.0f}, endEffectorPosition{6.0f, 0.0f} {}
+kinematicChain::kinematicChain() = default;
 
 std::vector<std::vector<float>> kinematicChain::transformationMatrix(float angle, float length) {
     return {
@@ -76,18 +76,28 @@ bool kinematicChain::inverseKinematicsCCD(const Point &target, std::vector<float
     return false;
 }
 
-float kinematicChain::getAngle(float angle) {
+float kinematicChain::normalizeAngle(float angle) {
     while (angle < 0) angle += 360.0f;
     while (angle >= 360.0f) angle -= 360.0f;
     return angle;
 }
 
-void kinematicChain::updateLinkLength(const int linkNumber, const float newLength) {
+void kinematicChain::setLinkLength(const int linkNumber, const float newLength) {
     if (linkNumber >= 0 && linkNumber < linkLengths.size()) {
         linkLengths[linkNumber] = newLength;
     }
 }
 
+void kinematicChain::setJointAngles(const int jointNumber, const float newAngle) {
+    if (jointNumber >= 0 && jointNumber < jointAngles.size()) {
+        jointAngles[jointNumber] = newAngle;
+    }
+}
+
 const std::vector<float> &kinematicChain::getLinkLengths() const {
     return linkLengths;
+}
+
+const std::vector<float> &kinematicChain::getJointAngles() const {
+    return jointAngles;
 }

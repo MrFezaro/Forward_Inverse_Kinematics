@@ -1,16 +1,20 @@
 #include "geometryHelpers.hpp"
 #include "kinematicChain.hpp"
 #include "sceneManager.hpp"
-#include "uiManager.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
 #include "threepp/threepp.hpp"
+#include "uiManager.hpp"
 
 constexpr float PI = 3.14159265358979323846f;
 
 using namespace threepp;
 
+sceneManager scene;
+kinematicChain chain{};
+uiManager ui(scene, chain);
+
 int main() {
-    sceneManager scene;
+    ui.render();
 
     // Create base
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
@@ -66,10 +70,6 @@ int main() {
     float lengthLink2 = 2.0f;
     float lengthLink3 = 2.0f;
 
-    kinematicChain kinematicChain(lengthLink1, lengthLink2, lengthLink3);
-    uiManager uiManager(scene, kinematicChain);
-    uiManager.render();
-
     // Apply initial rotations and lengths to the joints and links
     joint1->rotation.z = math::degToRad(angleJoint1);
     joint2->rotation.z = math::degToRad(angleJoint2);
@@ -90,22 +90,23 @@ int main() {
     scene.canvas.animate([&]() {
         scene.renderer.render(scene.scene, scene.camera);
 
-        uiManager.render();
+        ui.render();
 
-        if (paramsChanged) {
-            paramsChanged = false;
+        if (ui.paramsChanged) {
+            ui.paramsChanged = false;
 
-            if (isForwardKinematics) {
+            if (ui.isForwardKinematics) {
                 // Apply rotations to the joints
-                joint1->rotation.z = math::degToRad(angleJoint1);
-                joint2->rotation.z = math::degToRad(angleJoint2);
-                joint3->rotation.z = math::degToRad(angleJoint3);
+                std::vector<float> jointAngles = chain.getJointAngles();
+                for (auto &angle: jointAngles) {
+                    angle *= (180.0f / PI);
+                }
+                joint1->rotation.z = jointAngles[0];
+                joint2->rotation.z = jointAngles[1];
+                joint3->rotation.z = jointAngles[2];
 
                 // Calculate and store the end effector position
-                const float theta1 = angleJoint1 * (PI / 180.0f);
-                const float theta2 = angleJoint2 * (PI / 180.0f);
-                const float theta3 = angleJoint3 * (PI / 180.0f);
-                endEffectorPosition = kinematicChain.forwardKinematics(theta1, theta2, theta3);
+
             } else {
                 // Perform inverse kinematics to find angles
                 float theta1 = angleJoint1 * (PI / 180.0f);

@@ -15,8 +15,12 @@ public:
     bool inverseKinematicsCCD(const Point &target, std::vector<float> &jointAngles) const;
 
     [[nodiscard]] const std::vector<float> &getLinkLengths() const;
-    [[nodiscard]] static float getAngle(float angle);
-    void updateLinkLength(int linkNumber, float newLength);
+    [[nodiscard]] const std::vector<float> &getJointAngles() const;
+    [[nodiscard]] static float normalizeAngle(float angle);
+    void setLinkLength(int linkNumber, float newLength);
+    void setJointAngles(int jointNumber, float newAngle);
+
+
 
 private:
     std::vector<float> linkLengths = {2.0f, 2.0f, 2.0f};
