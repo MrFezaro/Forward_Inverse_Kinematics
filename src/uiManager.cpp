@@ -13,67 +13,78 @@ uiManager::uiManager(sceneManager &scene, kinematicChain &kinematicChainInstance
 
           if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
               isForwardKinematics = !isForwardKinematics;
-              if (!isForwardKinematics) {
-                  kinematicChainInstance.target = endEffectorPosition;
-                  paramsChanged = true;
-              }
+              paramsChanged = true;
           }
 
           if (isForwardKinematics) {
-              ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 360.0f);
-              paramsChanged = paramsChanged || ImGui::IsItemEdited();
-              ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 360.0f);
-              paramsChanged = paramsChanged || ImGui::IsItemEdited();
-              ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 360.0f);
-              paramsChanged = paramsChanged || ImGui::IsItemEdited();
+              float angle1 = kinematicChainInstance.getJointAngles()[0];
+              float angle2 = kinematicChainInstance.getJointAngles()[1];
+              float angle3 = kinematicChainInstance.getJointAngles()[2];
+
+              if (ImGui::SliderFloat("Angle Joint 1", &angle1, 0.0f, 360.0f)) {
+                  kinematicChainInstance.setJointAngles(0, angle1);
+                  paramsChanged = true;
+              }
+              if (ImGui::SliderFloat("Angle Joint 2", &angle2, 0.0f, 360.0f)) {
+                  kinematicChainInstance.setJointAngles(1, angle2);
+                  paramsChanged = true;
+              }
+              if (ImGui::SliderFloat("Angle Joint 3", &angle3, 0.0f, 360.0f)) {
+                  kinematicChainInstance.setJointAngles(2, angle3);
+                  paramsChanged = true;
+              }
 
               ImGui::Text("End Effector Position:");
+              point endEffectorPosition = kinematicChainInstance.forwardKinematics();
               ImGui::Text("X: %.2f", endEffectorPosition.y * -1);
               ImGui::Text("Y: %.2f", endEffectorPosition.x * -1);
           } else {
-              auto targetX = target.x;
-              auto targetY = target.y;
-              if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-                  target.x = targetX;
+              point target = kinematicChainInstance.getTarget();
+              if (ImGui::SliderFloat("Target X", &target.x, -10.0f, 10.0f)) {
+                  kinematicChainInstance.setTarget(target);
                   paramsChanged = true;
               }
-              if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-                  target.y = targetY;
+              if (ImGui::SliderFloat("Target Y", &target.y, -10.0f, 10.0f)) {
+                  kinematicChainInstance.setTarget(target);
                   paramsChanged = true;
               }
 
-              ImGui::Text("Calculated Angles:");
-              ImGui::Text("Angle Joint 1: %.2f", angleJoint1);
-              ImGui::Text("Angle Joint 2: %.2f", angleJoint2);
-              ImGui::Text("Angle Joint 3: %.2f", angleJoint3);
-
-              if (!kinematicChainInstance.inverseKinematicsCCD(target, angleJoint1, angleJoint2, angleJoint3)) {
+              if (!kinematicChainInstance.inverseKinematicsCCD()) {
                   ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
+              } else {
+                  const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
+                  ImGui::Text("Calculated Angles:");
+                  ImGui::Text("Angle Joint 1: %.2f", jointAngles[0]);
+                  ImGui::Text("Angle Joint 2: %.2f", jointAngles[1]);
+                  ImGui::Text("Angle Joint 3: %.2f", jointAngles[2]);
               }
           }
 
-          if (ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.0f, 5.0f)) {
-              kinematicChainInstance.updateLinkLength(0, lengthLink1);
+          float link1 = kinematicChainInstance.getLinkLengths()[0];
+          float link2 = kinematicChainInstance.getLinkLengths()[1];
+          float link3 = kinematicChainInstance.getLinkLengths()[2];
+
+          if (ImGui::SliderFloat("Length Link 1", &link1, 1.0f, 5.0f)) {
+              kinematicChainInstance.setLinkLength(0, link1);
               paramsChanged = true;
           }
-          if (ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.0f, 5.0f)) {
-              kinematicChainInstance.updateLinkLength(1, lengthLink2);
+          if (ImGui::SliderFloat("Length Link 2", &link2, 1.0f, 5.0f)) {
+              kinematicChainInstance.setLinkLength(1, link2);
               paramsChanged = true;
           }
-          if (ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.0f, 5.0f)) {
-              kinematicChainInstance.updateLinkLength(2, lengthLink3);
-              setLinkLength(2, lengthLink3, link3, joint3);
+          if (ImGui::SliderFloat("Length Link 3", &link3, 1.0f, 5.0f)) {
+              kinematicChainInstance.setLinkLength(2, link3);
               paramsChanged = true;
           }
 
           if (ImGui::Button("Reset")) {
-              angleJoint1 = 0.0f;
-              angleJoint2 = 0.0f;
-              angleJoint3 = 0.0f;
-              target = {6.0f, 0.0f};
-              kinematicChainInstance.updateLinkLength(0, 2.0f);
-              kinematicChainInstance.updateLinkLength(1, 2.0f);
-              kinematicChainInstance.updateLinkLength(2, 2.0f);
+              kinematicChainInstance.setJointAngles(0, 0.0f);
+              kinematicChainInstance.setJointAngles(1, 0.0f);
+              kinematicChainInstance.setJointAngles(2, 0.0f);
+              kinematicChainInstance.setLinkLength(0, 2.0f);
+              kinematicChainInstance.setLinkLength(1, 2.0f);
+              kinematicChainInstance.setLinkLength(2, 2.0f);
+              kinematicChainInstance.setTarget({6.0f, 0.0f});
               paramsChanged = true;
           }
 

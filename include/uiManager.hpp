@@ -18,4 +18,4 @@ private:
     ImguiFunctionalContext ui;
 };
 
-#endif// UIMANAGER_HPP
+#endif // UIMANAGER_HPP

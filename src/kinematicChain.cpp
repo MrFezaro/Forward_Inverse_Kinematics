@@ -22,7 +22,7 @@ std::vector<std::vector<float>> kinematicChain::matrixMultiply(const std::vector
     return result;
 }
 
-Point kinematicChain::forwardKinematics(const std::vector<float> &jointAngles) const {
+point kinematicChain::forwardKinematics() const {
     const auto T1 = transformationMatrix(jointAngles[0], linkLengths[0]);
     const auto T2 = transformationMatrix(jointAngles[1], linkLengths[1]);
     const auto T3 = transformationMatrix(jointAngles[2], linkLengths[2]);
@@ -33,7 +33,7 @@ Point kinematicChain::forwardKinematics(const std::vector<float> &jointAngles) c
     return {T123[0][2], T123[1][2]};
 }
 
-bool kinematicChain::inverseKinematicsCCD(const Point &target, std::vector<float> &jointAngles) const {
+bool kinematicChain::inverseKinematicsCCD(){
     const float maxReach = linkLengths[0] + linkLengths[1] + linkLengths[2];
 
     if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
@@ -44,7 +44,7 @@ bool kinematicChain::inverseKinematicsCCD(const Point &target, std::vector<float
 
     for (int iter = 0; iter < maxIterations; ++iter) {
         constexpr float tolerance = 1e-3f;
-        auto [x, y] = forwardKinematics(jointAngles);
+        auto [x, y] = forwardKinematics();
 
         const float errorX = target.x - x;
         const float errorY = target.y - y;
@@ -53,7 +53,7 @@ bool kinematicChain::inverseKinematicsCCD(const Point &target, std::vector<float
 
         for (int joint = 2; joint >= 0; --joint) {
             float &theta = jointAngles[joint];
-            auto [x, y] = forwardKinematics(jointAngles);
+            auto [x, y] = forwardKinematics();
 
             const float jointX = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * cos(jointAngles[0])
                                                                  : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
@@ -90,8 +90,12 @@ void kinematicChain::setLinkLength(const int linkNumber, const float newLength) 
 
 void kinematicChain::setJointAngles(const int jointNumber, const float newAngle) {
     if (jointNumber >= 0 && jointNumber < jointAngles.size()) {
-        jointAngles[jointNumber] = newAngle;
+        jointAngles[jointNumber] = newAngle * (PI / 180.0f);
     }
+}
+
+void kinematicChain::setTarget(const point &newTarget) {
+    target = newTarget;
 }
 
 const std::vector<float> &kinematicChain::getLinkLengths() const {
@@ -99,5 +103,15 @@ const std::vector<float> &kinematicChain::getLinkLengths() const {
 }
 
 const std::vector<float> &kinematicChain::getJointAngles() const {
+    // static std::vector<float> jointAnglesInDegrees;
+    // jointAnglesInDegrees.clear();
+    // for (const auto &angle : jointAngles) {
+    //     jointAnglesInDegrees.push_back(angle * (180.f / PI));
+    // }
+    // return jointAnglesInDegrees;
     return jointAngles;
+}
+
+point kinematicChain::getTarget() const {
+    return target;
 }

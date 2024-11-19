@@ -2,12 +2,24 @@
 #define GEOMETRYHELPERS_HPP
 
 #include "threepp/threepp.hpp"
+#include "kinematicChain.hpp"
 
-using namespace threepp;
+class GeometryHelpers {
+public:
+  GeometryHelpers(threepp::Scene &scene, kinematicChain &chain);
 
-std::shared_ptr<Mesh> createJoint(const BoxGeometry::Params &params, const Color &color);
-std::shared_ptr<Mesh> createLink(float length, float radius, const Color &color);
-std::shared_ptr<Mesh> createSphere(float radius, const Color &color);
-void setLinkLength(float &linkLength, float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint);
+  void createKinematicChain();
+  std::shared_ptr<threepp::Object3D> joint1;
+  std::shared_ptr<threepp::Object3D> joint2;
+  std::shared_ptr<threepp::Object3D> joint3;
+
+private:
+  threepp::Scene &scene;
+  kinematicChain &chain;
+
+  std::shared_ptr<threepp::Mesh> createJoint(const threepp::BoxGeometry::Params &params, const threepp::Color &color);
+  std::shared_ptr<threepp::Mesh> createLink(float length, float radius, const threepp::Color &color);
+  std::shared_ptr<threepp::Mesh> createSphere(float radius, const threepp::Color &color);
+};
 
 #endif // GEOMETRYHELPERS_HPP
