@@ -9,16 +9,20 @@ struct Point {
 
 class kinematicChain {
 public:
-    kinematicChain(float L1, float L2, float L3);
+    kinematicChain();
 
-    [[nodiscard]] Point forwardKinematics(float theta1, float theta2, float theta3) const;
-    bool inverseKinematicsCCD(const Point &target, float &theta1, float &theta2, float &theta3) const;
-    [[nodiscard]] static float normalizeAngle(float angle);
-    void updateLinkLengths(float newL1, float newL2, float newL3);
+    [[nodiscard]] Point forwardKinematics(const std::vector<float> &jointAngles) const;
+    bool inverseKinematicsCCD(const Point &target, std::vector<float> &jointAngles) const;
+
+    [[nodiscard]] const std::vector<float> &getLinkLengths() const;
+    [[nodiscard]] static float getAngle(float angle);
+    void updateLinkLength(int linkNumber, float newLength);
 
 private:
-    // const float PI = 3.14159265358979323846f;
-    float L1, L2, L3;
+    std::vector<float> linkLengths = {2.0f, 2.0f, 2.0f};
+    std::vector<float> jointAngles = {0.0f, 0.0f, 0.0f};
+    Point endEffectorPosition = {6.0f, 0.0f};
+    // Point target = {6.0f, 0.0f};
 
     [[nodiscard]] static std::vector<std::vector<float>> transformationMatrix(float angle, float length);
     [[nodiscard]] static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);

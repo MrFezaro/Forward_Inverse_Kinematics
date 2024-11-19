@@ -1,5 +1,7 @@
 #include "geometryHelpers.hpp"
 #include "kinematicChain.hpp"
+#include "sceneManager.hpp"
+#include "uiManager.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
 #include "threepp/threepp.hpp"
 
@@ -8,33 +10,25 @@ constexpr float PI = 3.14159265358979323846f;
 using namespace threepp;
 
 int main() {
-    Canvas canvas("Forward and inverse kinematic test", {{"aa", 8}});
-    GLRenderer renderer(canvas.size());
-
-    Scene scene;
-    scene.background = Color::black;
-    PerspectiveCamera camera(60, canvas.aspect(), 0.1f, 100);
-    camera.position.z = 10;
-
-    OrbitControls controls(camera, canvas);
+    sceneManager scene;
 
     // Create base
-    BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
-    auto base = createJoint(baseParams, Color::white);
-    scene.add(base);
+    const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
+    const auto base = createJoint(baseParams, Color::white);
+    scene.scene.add(base);
     base->position.y = 2.0f;
     base->rotation.y = math::degToRad(180);// Rotate base to align with world
 
     // Create joints
-    BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
-    auto joint1 = createJoint(jointParams, Color::green);
-    auto joint2 = createJoint(jointParams, Color::red);
-    auto joint3 = createJoint(jointParams, Color::blue);
+    const BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
+    const auto joint1 = createJoint(jointParams, Color::green);
+    const auto joint2 = createJoint(jointParams, Color::red);
+    const auto joint3 = createJoint(jointParams, Color::blue);
 
     // Create links (cylinders)
-    auto link1 = createLink(1.0f, 0.125f, Color::yellow);
-    auto link2 = createLink(1.0f, 0.125f, Color::yellow);
-    auto link3 = createLink(1.0f, 0.125f, Color::yellow);
+    const auto link1 = createLink(1.0f, 0.125f, Color::yellow);
+    const auto link2 = createLink(1.0f, 0.125f, Color::yellow);
+    const auto link3 = createLink(1.0f, 0.125f, Color::yellow);
 
     // Attach joints hierarchically
     base->add(joint1);
@@ -72,100 +66,9 @@ int main() {
     float lengthLink2 = 2.0f;
     float lengthLink3 = 2.0f;
 
-    bool paramsChanged = false;
-    bool isForwardKinematics = true;         // Variable to track the current mode
-    Point target = {6.0f, 0.0f};             // Target position for inverse kinematics
-    Point endEffectorPosition = {6.0f, 0.0f};// Variable to store the end effector position
-
-    // Initialize the kinematic chain with link lengths
     kinematicChain kinematicChain(lengthLink1, lengthLink2, lengthLink3);
-
-    auto ui = ImguiFunctionalContext(canvas.windowPtr(), [&] {
-        ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
-        ImGui::SetNextWindowSize({320, 0}, 0);
-        ImGui::Begin("Joint Controls");
-
-        // Check if the mouse is over the ImGui window or any ImGui item is active
-        const bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
-        const bool isInteracting = ImGui::IsAnyItemActive();
-
-        if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
-            isForwardKinematics = !isForwardKinematics;
-            if (!isForwardKinematics) {
-                target = endEffectorPosition;
-                paramsChanged = true;
-            }
-        }
-
-        if (isForwardKinematics) {
-            ImGui::SliderFloat("Angle Joint 1", &angleJoint1, 0.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 2", &angleJoint2, 0.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-            ImGui::SliderFloat("Angle Joint 3", &angleJoint3, 0.0f, 360.0f);
-            paramsChanged = paramsChanged || ImGui::IsItemEdited();
-
-            // Display the end effector position
-            ImGui::Text("End Effector Position:");
-            ImGui::Text("X: %.2f", endEffectorPosition.y * -1);//Sorry, I had to change this to get the correct output
-            ImGui::Text("Y: %.2f", endEffectorPosition.x * -1);//Sorry, I had to change this to get the correct output
-        } else {
-            auto targetX = target.x;
-            auto targetY = target.y;
-            if (ImGui::SliderFloat("Target X", &targetX, -10.0f, 10.0f)) {
-                target.x = targetX;
-                paramsChanged = true;
-            }
-            if (ImGui::SliderFloat("Target Y", &targetY, -10.0f, 10.0f)) {
-                target.y = targetY;
-                paramsChanged = true;
-            }
-
-            // Display the calculated joint angles
-            ImGui::Text("Calculated Angles:");
-            ImGui::Text("Angle Joint 1: %.2f", angleJoint1);
-            ImGui::Text("Angle Joint 2: %.2f", angleJoint2);
-            ImGui::Text("Angle Joint 3: %.2f", angleJoint3);
-
-            if (!kinematicChain.inverseKinematicsCCD(target, angleJoint1, angleJoint2, angleJoint3)) {
-                ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
-            }
-        }
-
-        // Add sliders to change the lengths of the links
-        if (ImGui::SliderFloat("Length Link 1", &lengthLink1, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink1, lengthLink1, link1, joint2);
-            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
-            paramsChanged = true;
-        }
-        if (ImGui::SliderFloat("Length Link 2", &lengthLink2, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink2, lengthLink2, link2, joint3);
-            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
-            paramsChanged = true;
-        }
-        if (ImGui::SliderFloat("Length Link 3", &lengthLink3, 1.0f, 5.0f)) {
-            setLinkLength(lengthLink3, lengthLink3, link3, sphere);
-            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
-            paramsChanged = true;
-        }
-
-        if (ImGui::Button("Reset")) {
-            angleJoint1 = 0.0f;
-            angleJoint2 = 0.0f;
-            angleJoint3 = 0.0f;
-            target = {6.0f, 0.0f};
-            setLinkLength(lengthLink1, 2.0f, link1, joint2);
-            setLinkLength(lengthLink2, 2.0f, link2, joint3);
-            setLinkLength(lengthLink3, 2.0f, link3, sphere);
-            kinematicChain.updateLinkLengths(lengthLink1, lengthLink2, lengthLink3);
-            paramsChanged = true;
-        }
-
-        ImGui::End();
-
-        // Disable OrbitControls if the mouse is over the ImGui window or any ImGui item is active
-        controls.enabled = !(isHovered || isInteracting);
-    });
+    uiManager uiManager(scene, kinematicChain);
+    uiManager.render();
 
     // Apply initial rotations and lengths to the joints and links
     joint1->rotation.z = math::degToRad(angleJoint1);
@@ -184,10 +87,10 @@ int main() {
 
     // Animation loop
     Clock clock;
-    canvas.animate([&]() {
-        renderer.render(scene, camera);
+    scene.canvas.animate([&]() {
+        scene.renderer.render(scene.scene, scene.camera);
 
-        ui.render();
+        uiManager.render();
 
         if (paramsChanged) {
             paramsChanged = false;

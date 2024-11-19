@@ -1,4 +1,5 @@
 #include "geometryHelpers.hpp"
+#include "kinematicChain.hpp"
 
 std::shared_ptr<Mesh> createJoint(const BoxGeometry::Params &params, const Color &color) {
     const auto geometry = BoxGeometry::create(params);
@@ -20,9 +21,10 @@ std::shared_ptr<Mesh> createSphere(const float radius, const Color &color) {
     return Mesh::create(geometry, material);
 }
 
-void setLinkLength(float &linkLength, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
-    linkLength = newLength;
-    link->scale.y = newLength;
-    link->position.y = -newLength / 2.0f;
-    joint->position.y = -newLength;
+void setLinkLength(kinematicChain &chain, const int linkIndex, const float newLength, const std::shared_ptr<Mesh> &link, const std::shared_ptr<Mesh> &joint) {
+    if (linkIndex >= 0 && linkIndex < chain.getLinkLengths().size()) {
+        chain.setLinkLength(linkIndex, newLength);
+        link->position.y = -newLength / 2.0f;
+        joint->position.y = -newLength;
+    }
 }
