@@ -1,8 +1,10 @@
-# Forward- and Inverse Kinematics of a 3-DOF arm
+# Forward and Inverse Kinematics of a 3-DOF Arm
 #### Candidate Number: 10053
 
-![Demo](docs/assets/Program_demo.gif)
-Full demo video [here](https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming)
+<div style="text-align: center;">
+  <img src="docs/assets/Program_demo.gif" alt="Demo">
+  <p>Full demo video <a href="https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming">here</a></p>
+</div>
 
 ## Overview
 This project aims to simulate the forward and inverse kinematics of a 3-DOF (Degree of Freedom) robotic arm using the threepp library. It provides a visual representation and control interface for manipulating the arm's joints and links.
@@ -16,28 +18,9 @@ This project aims to simulate the forward and inverse kinematics of a 3-DOF (Deg
 - **Cross-Platform:** Support for Windows, macOS, and Linux.
 
 ## Usage
-To use this project, follow these steps:
-
-1. **Clone the Repository:**
-   ```sh
-   git clone https://github.com/MrFezaro/Forward-Inverse-Kinematics.git
-   cd Forward-Inverse-Kinematics
-   ```
-2. **Build the Project:**
-   ```sh
-    mkdir build
-    cd build
-    cmake ..
-    make
-    ```
-3. **Run the Application:**
-    ```sh
-    ./kinematics_demo
-    ```
-4. **Control the Arm:**
-    - Use the switch to toggle between forward and inverse kinematics.
-    - Drag the sliders to adjust the joint angles og target position.
-    - Click reset to set the arm to its initial position.
+   - Use the switch to toggle between forward and inverse kinematics.
+   - Drag the sliders to adjust the joint angles og target position.
+   - Click reset to set the arm to its initial position.
 
 ## Dependencies
 - **threepp:** A C++ library for 3D graphics
