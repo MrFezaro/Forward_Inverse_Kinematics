@@ -2,15 +2,15 @@
 
 using namespace threepp;
 
-GeometryHelpers::GeometryHelpers(Scene &scene, kinematicChain &chain) : scene(scene), chain(chain) {}
+chainGeometry::chainGeometry(Scene &scene, kinematicChain &chain) : scene(scene), chain(chain) {}
 
-std::shared_ptr<Mesh> GeometryHelpers::createJoint(const BoxGeometry::Params &params, const Color &color) {
+std::shared_ptr<Mesh> chainGeometry::createJoint(const BoxGeometry::Params &params, const Color &color) {
     const auto geometry = BoxGeometry::create(params);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     return Mesh::create(geometry, material);
 }
 
-std::shared_ptr<Mesh> GeometryHelpers::createLink(const float length, const float radius, const Color &color) {
+std::shared_ptr<Mesh> chainGeometry::createLink(const float length, const float radius, const Color &color) {
     const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     auto link = Mesh::create(geometry, material);
@@ -18,13 +18,13 @@ std::shared_ptr<Mesh> GeometryHelpers::createLink(const float length, const floa
     return link;
 }
 
-std::shared_ptr<Mesh> GeometryHelpers::createSphere(const float radius, const Color &color) {
+std::shared_ptr<Mesh> chainGeometry::createSphere(const float radius, const Color &color) {
     const auto geometry = SphereGeometry::create(radius, 32, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     return Mesh::create(geometry, material);
 }
 
-void GeometryHelpers::createKinematicChain() {
+void chainGeometry::createKinematicChain() {
     // Create base
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
     const auto base = createJoint(baseParams, Color::white);
@@ -39,9 +39,9 @@ void GeometryHelpers::createKinematicChain() {
     joint3 = createJoint(jointParams, Color::blue);
 
     // Create links (cylinders)
-    const auto link1 = createLink(1.0f, 0.125f, Color::yellow);
-    const auto link2 = createLink(1.0f, 0.125f, Color::yellow);
-    const auto link3 = createLink(1.0f, 0.125f, Color::yellow);
+    link1 = createLink(1.0f, 0.125f, Color::yellow);
+    link2 = createLink(1.0f, 0.125f, Color::yellow);
+    link3 = createLink(1.0f, 0.125f, Color::yellow);
 
     // Attach joints hierarchically
     base->add(joint1);
@@ -66,7 +66,7 @@ void GeometryHelpers::createKinematicChain() {
     link3->rotation.y = math::degToRad(90);// Rotate link3 to align with joint3
 
     // Create and attach a sphere to the end of joint3
-    auto sphere = createSphere(0.3f, Color::white);// Sphere with radius 0.3
+    sphere = createSphere(0.3f, Color::white);// Sphere with radius 0.3
     joint3->add(sphere);
     sphere->position.y = -1.0f;// Position the sphere at the end of joint3
 

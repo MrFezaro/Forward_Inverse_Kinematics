@@ -4,15 +4,19 @@
 #include "kinematicChain.hpp"
 #include "threepp/threepp.hpp"
 
-class GeometryHelpers {
+class chainGeometry {
 public:
-    GeometryHelpers(threepp::Scene &scene, kinematicChain &chain);
+    chainGeometry(threepp::Scene &scene, kinematicChain &chain);
 
     void createKinematicChain();
 
     std::shared_ptr<threepp::Object3D> joint1;
     std::shared_ptr<threepp::Object3D> joint2;
     std::shared_ptr<threepp::Object3D> joint3;
+    std::shared_ptr<threepp::Object3D> link1;
+    std::shared_ptr<threepp::Object3D> link2;
+    std::shared_ptr<threepp::Object3D> link3;
+    std::shared_ptr<threepp::Object3D> sphere;
 
 private:
     threepp::Scene &scene;

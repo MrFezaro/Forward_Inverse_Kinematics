@@ -6,6 +6,6 @@
 #include "sceneManager.hpp"
 #include "uiManager.hpp"
 
-void runAnimationLoop(sceneManager &scene, kinematicChain &chain, uiManager &ui, GeometryHelpers &geometryHelpers);
+void runAnimationLoop(sceneManager &scene, kinematicChain &kinematicChain, uiManager &ui, chainGeometry &chainGeometry);
 
 #endif// ANIMATIONLOOP_HPP

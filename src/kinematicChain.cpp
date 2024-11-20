@@ -97,12 +97,6 @@ const std::vector<float> &kinematicChain::getLinkLengths() const {
 }
 
 const std::vector<float> &kinematicChain::getJointAngles() const {
-    // static std::vector<float> jointAnglesInDegrees;
-    // jointAnglesInDegrees.clear();
-    // for (const auto &angle : jointAngles) {
-    //     jointAnglesInDegrees.push_back(angle * (180.f / PI));
-    // }
-    // return jointAnglesInDegrees;
     return jointAngles;
 }
 

@@ -31,9 +31,9 @@ void uiManager::handleKinematics() {
     }
 
     if (isForwardKinematics) {
-        float angle1 = kinematicChainInstance.getJointAngles()[0];
-        float angle2 = kinematicChainInstance.getJointAngles()[1];
-        float angle3 = kinematicChainInstance.getJointAngles()[2];
+        float angle1 = kinematicChainInstance.getJointAngles()[0] * (180.0f / PI);
+        float angle2 = kinematicChainInstance.getJointAngles()[1] * (180.0f / PI);
+        float angle3 = kinematicChainInstance.getJointAngles()[2] * (180.0f / PI);
 
         if (ImGui::SliderFloat("Angle Joint 1", &angle1, 0.0f, 360.0f)) {
             kinematicChainInstance.setJointAngles(0, angle1);
@@ -49,9 +49,9 @@ void uiManager::handleKinematics() {
         }
 
         ImGui::Text("End Effector Position:");
-        point endEffectorPosition = kinematicChainInstance.forwardKinematics();
-        ImGui::Text("X: %.2f", endEffectorPosition.y * -1);
-        ImGui::Text("Y: %.2f", endEffectorPosition.x * -1);
+        auto [x, y] = kinematicChainInstance.forwardKinematics();
+        ImGui::Text("X: %.2f", y);
+        ImGui::Text("Y: %.2f", x);
     } else {
         point target = kinematicChainInstance.getTarget();
         if (ImGui::SliderFloat("Target X", &target.x, -10.0f, 10.0f)) {
@@ -68,9 +68,9 @@ void uiManager::handleKinematics() {
         } else {
             const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
             ImGui::Text("Calculated Angles:");
-            ImGui::Text("Angle Joint 1: %.2f", jointAngles[0]);
-            ImGui::Text("Angle Joint 2: %.2f", jointAngles[1]);
-            ImGui::Text("Angle Joint 3: %.2f", jointAngles[2]);
+            ImGui::Text("Angle Joint 1: %.2f", jointAngles[0] * (180.0f / PI));
+            ImGui::Text("Angle Joint 2: %.2f", jointAngles[1] * (180.0f / PI));
+            ImGui::Text("Angle Joint 3: %.2f", jointAngles[2] * (180.0f / PI));
         }
     }
 }
@@ -105,6 +105,5 @@ void uiManager::handleReset() {
         kinematicChainInstance.setTarget({6.0f, 0.0f});
         paramsChanged = true;
     }
-
     ImGui::End();
 }

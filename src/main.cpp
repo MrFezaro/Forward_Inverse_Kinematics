@@ -4,12 +4,12 @@
 #include "uiManager.hpp"
 
 sceneManager scene;
-kinematicChain chain{};
-uiManager ui(scene, chain);
-GeometryHelpers geometryHelpers(scene.scene, chain);
+kinematicChain kinematicChain{};
+uiManager ui(scene, kinematicChain);
+chainGeometry chainGeometry(scene.scene, kinematicChain);
 
 int main() {
     ui.render();
-    geometryHelpers.createKinematicChain();
-    runAnimationLoop(scene, chain, ui, geometryHelpers);
+    chainGeometry.createKinematicChain();
+    runAnimationLoop(scene, kinematicChain, ui, chainGeometry);
 }
