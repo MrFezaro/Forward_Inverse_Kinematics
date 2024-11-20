@@ -1,7 +1,7 @@
-#include "geometryHelpers.hpp"
+#include "animationLoop.hpp"
+#include "chainGeometry.hpp"
 #include "sceneManager.hpp"
 #include "uiManager.hpp"
-#include "animationLoop.hpp"
 
 sceneManager scene;
 kinematicChain chain{};

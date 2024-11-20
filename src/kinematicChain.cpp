@@ -3,7 +3,7 @@
 
 kinematicChain::kinematicChain() = default;
 
-std::vector<std::vector<float>> kinematicChain::transformationMatrix(float angle, float length) {
+std::vector<std::vector<float>> kinematicChain::transformationMatrix(const float angle, const float length) {
     return {
             {cos(angle), -sin(angle), length * cos(angle)},
             {sin(angle), cos(angle), length * sin(angle)},
@@ -33,7 +33,7 @@ point kinematicChain::forwardKinematics() const {
     return {T123[0][2], T123[1][2]};
 }
 
-bool kinematicChain::inverseKinematicsCCD(){
+bool kinematicChain::inverseKinematicsCCD() {
     const float maxReach = linkLengths[0] + linkLengths[1] + linkLengths[2];
 
     if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
@@ -76,12 +76,6 @@ bool kinematicChain::inverseKinematicsCCD(){
     return false;
 }
 
-float kinematicChain::normalizeAngle(float angle) {
-    while (angle < 0) angle += 360.0f;
-    while (angle >= 360.0f) angle -= 360.0f;
-    return angle;
-}
-
 void kinematicChain::setLinkLength(const int linkNumber, const float newLength) {
     if (linkNumber >= 0 && linkNumber < linkLengths.size()) {
         linkLengths[linkNumber] = newLength;
@@ -114,4 +108,10 @@ const std::vector<float> &kinematicChain::getJointAngles() const {
 
 point kinematicChain::getTarget() const {
     return target;
+}
+
+float kinematicChain::normalizeAngle(float angle) {
+    while (angle < 0) angle += 360.0f;
+    while (angle >= 360.0f) angle -= 360.0f;
+    return angle;
 }

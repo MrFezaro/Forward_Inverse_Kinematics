@@ -24,4 +24,4 @@ private:
     bool isInteracting = false;
 };
 
-#endif // UIMANAGER_HPP
+#endif// UIMANAGER_HPP

@@ -1,15 +1,15 @@
 #include "uiManager.hpp"
-#include "geometryHelpers.hpp"
+#include "chainGeometry.hpp"
 #include "kinematicChain.hpp"
 
 uiManager::uiManager(sceneManager &scene, kinematicChain &kinematicChainInstance)
     : scene(scene), kinematicChainInstance(kinematicChainInstance), ui(scene.canvas.windowPtr(), [&] {
-        setupUI();
-        handleKinematics();
-        handleLinkLengths();
-        handleReset();
-        scene.controls.enabled = !(isHovered || isInteracting);
-    }) {}
+          setupUI();
+          handleKinematics();
+          handleLinkLengths();
+          handleReset();
+          scene.controls.enabled = !(isHovered || isInteracting);
+      }) {}
 
 void uiManager::render() {
     ui.render();
@@ -108,4 +108,3 @@ void uiManager::handleReset() {
 
     ImGui::End();
 }
-

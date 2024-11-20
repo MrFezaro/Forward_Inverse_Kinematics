@@ -1,4 +1,4 @@
-#include "geometryHelpers.hpp"
+#include "chainGeometry.hpp"
 
 using namespace threepp;
 
@@ -10,15 +10,15 @@ std::shared_ptr<Mesh> GeometryHelpers::createJoint(const BoxGeometry::Params &pa
     return Mesh::create(geometry, material);
 }
 
-std::shared_ptr<Mesh> GeometryHelpers::createLink(float length, float radius, const Color &color) {
+std::shared_ptr<Mesh> GeometryHelpers::createLink(const float length, const float radius, const Color &color) {
     const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     auto link = Mesh::create(geometry, material);
-    link->rotation.x = math::degToRad(90); // Align along Y axis
+    link->rotation.x = math::degToRad(90);// Align along Y axis
     return link;
 }
 
-std::shared_ptr<Mesh> GeometryHelpers::createSphere(float radius, const Color &color) {
+std::shared_ptr<Mesh> GeometryHelpers::createSphere(const float radius, const Color &color) {
     const auto geometry = SphereGeometry::create(radius, 32, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     return Mesh::create(geometry, material);
@@ -30,7 +30,7 @@ void GeometryHelpers::createKinematicChain() {
     const auto base = createJoint(baseParams, Color::white);
     scene.add(base);
     base->position.y = 2.0f;
-    base->rotation.y = math::degToRad(180); // Rotate base to align with world
+    base->rotation.y = math::degToRad(180);// Rotate base to align with world
 
     // Create joints
     const BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};

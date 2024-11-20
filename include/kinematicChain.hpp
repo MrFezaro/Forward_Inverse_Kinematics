@@ -35,4 +35,4 @@ private:
     [[nodiscard]] static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);
 };
 
-#endif // KINEMATICCHAIN_HPP
+#endif// KINEMATICCHAIN_HPP

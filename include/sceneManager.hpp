@@ -14,4 +14,4 @@ public:
     threepp::OrbitControls controls;
 };
 
-#endif // SCENEMANAGER_HPP
+#endif// SCENEMANAGER_HPP

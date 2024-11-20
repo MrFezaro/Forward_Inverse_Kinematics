@@ -1,5 +1,5 @@
 add_executable(kinematics_demo "main.cpp"
-        geometryHelpers.cpp
+        chainGeometry.cpp
         sceneManager.cpp
         kinematicChain.cpp
         uiManager.cpp
