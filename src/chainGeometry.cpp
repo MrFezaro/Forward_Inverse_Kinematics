@@ -71,8 +71,8 @@ void chainGeometry::createKinematicChain() {
     sphere->position.y = -1.0f;// Position the sphere at the end of joint3
 
     // Apply initial rotations and lengths to the joints and links
-    std::vector<float> jointAngles = chain.getJointAngles();
-    std::vector<float> linkLengths = chain.getLinkLengths();
+    const std::vector<float> jointAngles = chain.getJointAngles();
+    const std::vector<float> linkLengths = chain.getLinkLengths();
 
     joint1->rotation.z = jointAngles[0];
     joint2->rotation.z = jointAngles[1];

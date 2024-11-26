@@ -1,19 +1,49 @@
-#include "mathutil.hpp"
+#include "kinematicChain.cpp"
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("test add") {
-    constexpr int a = 5;
-    constexpr int b = 3;
+using Catch::Approx;
 
-    const int add2numbers = add(a, b);
-
-    CHECK(add2numbers == a + b);
+TEST_CASE("Forward Kinematics") {
+    const kinematicChain kc;
+    auto [x, y] = kc.forwardKinematics();
+    CHECK(x == Approx(6.0f));
+    CHECK(y == Approx(0.0f));
 }
-TEST_CASE("test subtract") {
-    constexpr int a = 10;
-    constexpr int b = 5;
 
-    const int subtract2numbers = subtract(a, b);
+TEST_CASE("Inverse Kinematics") {
+    kinematicChain kc;
+    constexpr point target = {2.0f, 2.0f};
+    kc.setTarget(target);
+    const bool success = kc.inverseKinematicsCCD();
+    REQUIRE(success == true);
+    CHECK(kc.getTarget().x == Approx(target.x));
+    CHECK(kc.getTarget().y == Approx(target.y));
+}
 
-    CHECK(subtract2numbers == a - b);
+TEST_CASE("Get Link Lengths") {
+    const kinematicChain kc;
+    const std::vector<float> &linkLengths = kc.getLinkLengths();
+    REQUIRE(linkLengths.size() == 3);
+    CHECK(linkLengths[0] == Approx(2.0f));
+    CHECK(linkLengths[1] == Approx(2.0f));
+    CHECK(linkLengths[2] == Approx(2.0f));
+}
+
+TEST_CASE("Set and Get Joint Angles") {
+    kinematicChain kc;
+    kc.setJointAngles(0, 45);
+    kc.setJointAngles(1, 45);
+    kc.setJointAngles(2, 45);
+    std::vector<float> jointAngles = kc.getJointAngles();
+    REQUIRE(jointAngles.size() == 3);
+    CHECK(jointAngles[0] == Approx(M_PI / 4));
+    CHECK(jointAngles[1] == Approx(M_PI / 4));
+    CHECK(jointAngles[2] == Approx(M_PI / 4));
+}
+
+TEST_CASE("Normalize Angle") {
+    constexpr float angle = M_PI * 3;
+    const float normalizedAngle = kinematicChain::normalizeAngle(angle);
+    CHECK(normalizedAngle == Approx(M_PI));
 }

@@ -1,8 +1,8 @@
 #ifndef GEOMETRYHELPERS_HPP
 #define GEOMETRYHELPERS_HPP
 
+#include <threepp/threepp.hpp>
 #include "kinematicChain.hpp"
-#include "threepp/threepp.hpp"
 
 class chainGeometry {
 public:

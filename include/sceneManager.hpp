@@ -1,7 +1,7 @@
 #ifndef SCENEMANAGER_HPP
 #define SCENEMANAGER_HPP
 
-#include "threepp/threepp.hpp"
+#include <threepp/threepp.hpp>
 
 class sceneManager {
 public:

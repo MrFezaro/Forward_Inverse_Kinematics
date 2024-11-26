@@ -3,7 +3,7 @@ project(Forward_Inverse_Kinematics)
 
 set(CMAKE_CXX_STANDARD 20)
 
-option(PROJECT_BUILD_TESTS "test functions" ON)
+option(PROJECT_BUILD_TESTS "test kinematic chain functions" OFF)
 
 include(FetchContent)
 
@@ -12,7 +12,7 @@ set(THREEPP_BUILD_EXAMPLES OFF)
 FetchContent_Declare(
         threepp
         GIT_REPOSITORY https://github.com/markaren/threepp.git
-        GIT_TAG 2e2397e0b7f0e639f254ea3046b70e53a71f0387
+        GIT_TAG 251d2723315a1ca3952c4d074a3bd038222f4289
 )
 FetchContent_MakeAvailable(threepp)
 
@@ -33,5 +33,4 @@ endif ()
 add_subdirectory(external)
 add_subdirectory(src)
 
-# Link the necessary libraries
 target_link_libraries(kinematics_demo PRIVATE threepp::threepp imgui::imgui)
