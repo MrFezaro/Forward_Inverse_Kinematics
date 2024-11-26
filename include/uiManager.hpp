@@ -2,11 +2,10 @@
 #define UIMANAGER_HPP
 #define _USE_MATH_DEFINES
 
-#include "kinematicChain.hpp"
-#include "sceneManager.hpp"
 #include <cmath>
 #include <threepp/extras/imgui/ImguiContext.hpp>
-
+#include "kinematicChain.hpp"
+#include "sceneManager.hpp"
 
 class uiManager {
 public:
