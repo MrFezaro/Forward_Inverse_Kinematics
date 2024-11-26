@@ -1,5 +1,4 @@
 #include "kinematicChain.hpp"
-#include <cmath>
 
 kinematicChain::kinematicChain() = default;
 
@@ -59,7 +58,6 @@ bool kinematicChain::inverseKinematicsCCD() {
                                                                  : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
             const float jointY = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * sin(jointAngles[0])
                                                                  : linkLengths[0] * sin(jointAngles[0]) + linkLengths[1] * sin(jointAngles[0] + jointAngles[1]);
-
             const float endEffectorX = x;
             const float endEffectorY = y;
 
@@ -70,9 +68,10 @@ bool kinematicChain::inverseKinematicsCCD() {
             const float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
 
             theta += angleToTarget - angleToEndEffector;
+
+            theta = normalizeAngle(theta);
         }
     }
-
     return false;
 }
 
@@ -84,7 +83,7 @@ void kinematicChain::setLinkLength(const int linkNumber, const float newLength) 
 
 void kinematicChain::setJointAngles(const int jointNumber, const float newAngle) {
     if (jointNumber >= 0 && jointNumber < jointAngles.size()) {
-        jointAngles[jointNumber] = newAngle * (PI / 180.0f);
+        jointAngles[jointNumber] = newAngle * (M_PI / 180.0f);
     }
 }
 
@@ -105,7 +104,8 @@ point kinematicChain::getTarget() const {
 }
 
 float kinematicChain::normalizeAngle(float angle) {
-    while (angle < 0) angle += 360.0f;
-    while (angle >= 360.0f) angle -= 360.0f;
+    constexpr float TWO_PI = 2.0f * M_PI;
+    while (angle < 0) angle += TWO_PI;
+    while (angle >= TWO_PI) angle -= TWO_PI;
     return angle;
 }

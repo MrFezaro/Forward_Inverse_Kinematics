@@ -29,11 +29,10 @@ void uiManager::handleKinematics() {
         isForwardKinematics = !isForwardKinematics;
         paramsChanged = true;
     }
-
     if (isForwardKinematics) {
-        float angle1 = kinematicChainInstance.getJointAngles()[0] * (180.0f / PI);
-        float angle2 = kinematicChainInstance.getJointAngles()[1] * (180.0f / PI);
-        float angle3 = kinematicChainInstance.getJointAngles()[2] * (180.0f / PI);
+        float angle1 = kinematicChainInstance.getJointAngles()[0] * (180.0f / M_PI);
+        float angle2 = kinematicChainInstance.getJointAngles()[1] * (180.0f / M_PI);
+        float angle3 = kinematicChainInstance.getJointAngles()[2] * (180.0f / M_PI);
 
         if (ImGui::SliderFloat("Angle Joint 1", &angle1, 0.0f, 360.0f)) {
             kinematicChainInstance.setJointAngles(0, angle1);
@@ -47,11 +46,11 @@ void uiManager::handleKinematics() {
             kinematicChainInstance.setJointAngles(2, angle3);
             paramsChanged = true;
         }
-
-        ImGui::Text("End Effector Position:");
         auto [x, y] = kinematicChainInstance.forwardKinematics();
-        ImGui::Text("X: %.2f", y);
-        ImGui::Text("Y: %.2f", x);
+        kinematicChainInstance.setTarget({x, y});
+        ImGui::Text("End Effector Position:");
+        ImGui::Text("X: %.2f", x);
+        ImGui::Text("Y: %.2f", y);
     } else {
         point target = kinematicChainInstance.getTarget();
         if (ImGui::SliderFloat("Target X", &target.x, -10.0f, 10.0f)) {
@@ -62,15 +61,14 @@ void uiManager::handleKinematics() {
             kinematicChainInstance.setTarget(target);
             paramsChanged = true;
         }
-
         if (!kinematicChainInstance.inverseKinematicsCCD()) {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
         } else {
             const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
             ImGui::Text("Calculated Angles:");
-            ImGui::Text("Angle Joint 1: %.2f", jointAngles[0] * (180.0f / PI));
-            ImGui::Text("Angle Joint 2: %.2f", jointAngles[1] * (180.0f / PI));
-            ImGui::Text("Angle Joint 3: %.2f", jointAngles[2] * (180.0f / PI));
+            ImGui::Text("Angle Joint 1: %.2f", jointAngles[0] * (180.0f / M_PI));
+            ImGui::Text("Angle Joint 2: %.2f", jointAngles[1] * (180.0f / M_PI));
+            ImGui::Text("Angle Joint 3: %.2f", jointAngles[2] * (180.0f / M_PI));
         }
     }
 }

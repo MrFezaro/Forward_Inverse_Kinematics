@@ -1,6 +1,8 @@
 #ifndef KINEMATICCHAIN_HPP
 #define KINEMATICCHAIN_HPP
+#define _USE_MATH_DEFINES
 
+#include <cmath>
 #include <vector>
 
 struct point {
@@ -11,7 +13,7 @@ class kinematicChain {
 public:
     kinematicChain();
 
-    [[nodiscard]] point forwardKinematics() const;
+    point forwardKinematics() const;
     bool inverseKinematicsCCD();
 
     [[nodiscard]] const std::vector<float> &getLinkLengths() const;
@@ -30,10 +32,8 @@ private:
     point endEffectorPosition = {6.0f, 0.0f};
     point target = {6.0f, 0.0f};
 
-    const float PI = 3.14159265358979323846f;
-
     [[nodiscard]] static std::vector<std::vector<float>> transformationMatrix(float angle, float length);
     [[nodiscard]] static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);
 };
 
-#endif // KINEMATICCHAIN_HPP
+#endif// KINEMATICCHAIN_HPP

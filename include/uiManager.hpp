@@ -1,6 +1,8 @@
 #ifndef UIMANAGER_HPP
 #define UIMANAGER_HPP
+#define _USE_MATH_DEFINES
 
+#include <cmath>
 #include "kinematicChain.hpp"
 #include "sceneManager.hpp"
 #include "threepp/extras/imgui/ImguiContext.hpp"
@@ -22,7 +24,6 @@ private:
     ImguiFunctionalContext ui;
     bool isHovered = false;
     bool isInteracting = false;
-    const float PI = 3.14159265358979323846f;
 };
 
 #endif// UIMANAGER_HPP
