@@ -1,8 +1,8 @@
 #include "uiManager.hpp"
 #include "chainGeometry.hpp"
-#include "kinematicChain.hpp"
+#include "chainKinematics.hpp"
 
-uiManager::uiManager(sceneManager &scene, kinematicChain &kinematicChainInstance)
+uiManager::uiManager(sceneManager &scene, chainKinematics &kinematicChainInstance)
     : scene(scene), kinematicChainInstance(kinematicChainInstance), ui(scene.canvas.windowPtr(), [&] {
           setupUI();
           handleKinematics();

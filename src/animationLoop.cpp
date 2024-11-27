@@ -2,7 +2,7 @@
 
 using namespace threepp;
 
-void runAnimationLoop(sceneManager &scene, kinematicChain &kinematicChain, uiManager &ui, chainGeometry &chainGeometry) {
+void runAnimationLoop(sceneManager &scene, chainKinematics &kinematicChainInstance, uiManager &ui, chainGeometry &chainGeometry) {
     Clock clock;
     scene.canvas.animate([&]() {
         scene.renderer.render(scene.scene, scene.camera);
@@ -12,8 +12,8 @@ void runAnimationLoop(sceneManager &scene, kinematicChain &kinematicChain, uiMan
         if (ui.paramsChanged) {
             ui.paramsChanged = false;
 
-            const std::vector<float> &jointAngles = kinematicChain.getJointAngles();
-            const std::vector<float> &linkLengths = kinematicChain.getLinkLengths();
+            const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
+            const std::vector<float> &linkLengths = kinematicChainInstance.getLinkLengths();
 
             chainGeometry.joint1->rotation.z = jointAngles[0];
             chainGeometry.joint2->rotation.z = jointAngles[1];

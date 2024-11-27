@@ -9,9 +9,9 @@ struct point {
     float x, y;
 };
 
-class kinematicChain {
+class chainKinematics {
 public:
-    kinematicChain();
+    chainKinematics();
 
     point forwardKinematics() const;
     bool inverseKinematicsCCD();

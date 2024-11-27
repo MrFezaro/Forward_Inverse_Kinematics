@@ -1,18 +1,18 @@
-#include "kinematicChain.cpp"
+#include "chainKinematics.cpp"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 using Catch::Approx;
 
 TEST_CASE("Forward Kinematics") {
-    const kinematicChain kc;
+    const chainKinematics kc;
     auto [x, y] = kc.forwardKinematics();
     CHECK(x == Approx(6.0f));
     CHECK(y == Approx(0.0f));
 }
 
 TEST_CASE("Inverse Kinematics") {
-    kinematicChain kc;
+    chainKinematics kc;
     constexpr point target = {2.0f, 2.0f};
     kc.setTarget(target);
     const bool success = kc.inverseKinematicsCCD();
@@ -22,7 +22,7 @@ TEST_CASE("Inverse Kinematics") {
 }
 
 TEST_CASE("Get Link Lengths") {
-    const kinematicChain kc;
+    const chainKinematics kc;
     const std::vector<float> &linkLengths = kc.getLinkLengths();
     REQUIRE(linkLengths.size() == 3);
     CHECK(linkLengths[0] == Approx(2.0f));
@@ -31,7 +31,7 @@ TEST_CASE("Get Link Lengths") {
 }
 
 TEST_CASE("Set and Get Joint Angles") {
-    kinematicChain kc;
+    chainKinematics kc;
     kc.setJointAngles(0, 45);
     kc.setJointAngles(1, 45);
     kc.setJointAngles(2, 45);
@@ -44,6 +44,6 @@ TEST_CASE("Set and Get Joint Angles") {
 
 TEST_CASE("Normalize Angle") {
     constexpr float angle = M_PI * 3;
-    const float normalizedAngle = kinematicChain::normalizeAngle(angle);
+    const float normalizedAngle = chainKinematics::normalizeAngle(angle);
     CHECK(normalizedAngle == Approx(M_PI));
 }

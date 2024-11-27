@@ -2,7 +2,7 @@
 
 using namespace threepp;
 
-chainGeometry::chainGeometry(Scene &scene, kinematicChain &chain) : scene(scene), chain(chain) {}
+chainGeometry::chainGeometry(Scene &scene, chainKinematics &chain) : scene(scene), chain(chain) {}
 
 std::shared_ptr<Mesh> chainGeometry::createJoint(const BoxGeometry::Params &params, const Color &color) {
     const auto geometry = BoxGeometry::create(params);
@@ -24,7 +24,7 @@ std::shared_ptr<Mesh> chainGeometry::createSphere(const float radius, const Colo
     return Mesh::create(geometry, material);
 }
 
-void chainGeometry::createKinematicChain() {
+void chainGeometry::create() {
     // Create base
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
     const auto base = createJoint(baseParams, Color::white);

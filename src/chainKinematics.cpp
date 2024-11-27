@@ -1,15 +1,15 @@
-#include "kinematicChain.hpp"
+#include "chainKinematics.hpp"
 
-kinematicChain::kinematicChain() = default;
+chainKinematics::chainKinematics() = default;
 
-std::vector<std::vector<float>> kinematicChain::transformationMatrix(const float angle, const float length) {
+std::vector<std::vector<float>> chainKinematics::transformationMatrix(const float angle, const float length) {
     return {
             {cos(angle), -sin(angle), length * cos(angle)},
             {sin(angle), cos(angle), length * sin(angle)},
             {0, 0, 1}};
 }
 
-std::vector<std::vector<float>> kinematicChain::matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B) {
+std::vector<std::vector<float>> chainKinematics::matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B) {
     std::vector result(3, std::vector<float>(3, 0));
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -21,7 +21,7 @@ std::vector<std::vector<float>> kinematicChain::matrixMultiply(const std::vector
     return result;
 }
 
-point kinematicChain::forwardKinematics() const {
+point chainKinematics::forwardKinematics() const {
     const auto T1 = transformationMatrix(jointAngles[0], linkLengths[0]);
     const auto T2 = transformationMatrix(jointAngles[1], linkLengths[1]);
     const auto T3 = transformationMatrix(jointAngles[2], linkLengths[2]);
@@ -32,7 +32,7 @@ point kinematicChain::forwardKinematics() const {
     return {T123[0][2], T123[1][2]};
 }
 
-bool kinematicChain::inverseKinematicsCCD() {
+bool chainKinematics::inverseKinematicsCCD() {
     const float maxReach = linkLengths[0] + linkLengths[1] + linkLengths[2];
 
     if (const float distanceToTarget = sqrt(target.x * target.x + target.y * target.y); distanceToTarget > maxReach) {
@@ -75,35 +75,35 @@ bool kinematicChain::inverseKinematicsCCD() {
     return false;
 }
 
-void kinematicChain::setLinkLength(const int linkNumber, const float newLength) {
+void chainKinematics::setLinkLength(const int linkNumber, const float newLength) {
     if (linkNumber >= 0 && linkNumber < linkLengths.size()) {
         linkLengths[linkNumber] = newLength;
     }
 }
 
-void kinematicChain::setJointAngles(const int jointNumber, const float newAngle) {
+void chainKinematics::setJointAngles(const int jointNumber, const float newAngle) {
     if (jointNumber >= 0 && jointNumber < jointAngles.size()) {
         jointAngles[jointNumber] = newAngle * (M_PI / 180.0f);
     }
 }
 
-void kinematicChain::setTarget(const point &newTarget) {
+void chainKinematics::setTarget(const point &newTarget) {
     target = newTarget;
 }
 
-const std::vector<float> &kinematicChain::getLinkLengths() const {
+const std::vector<float> &chainKinematics::getLinkLengths() const {
     return linkLengths;
 }
 
-const std::vector<float> &kinematicChain::getJointAngles() const {
+const std::vector<float> &chainKinematics::getJointAngles() const {
     return jointAngles;
 }
 
-point kinematicChain::getTarget() const {
+point chainKinematics::getTarget() const {
     return target;
 }
 
-float kinematicChain::normalizeAngle(float angle) {
+float chainKinematics::normalizeAngle(float angle) {
     constexpr float TWO_PI = 2.0f * M_PI;
     while (angle < 0) angle += TWO_PI;
     while (angle >= TWO_PI) angle -= TWO_PI;

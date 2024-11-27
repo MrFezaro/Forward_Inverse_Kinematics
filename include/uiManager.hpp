@@ -4,12 +4,12 @@
 
 #include <cmath>
 #include <threepp/extras/imgui/ImguiContext.hpp>
-#include "kinematicChain.hpp"
+#include "chainKinematics.hpp"
 #include "sceneManager.hpp"
 
 class uiManager {
 public:
-    uiManager(sceneManager &scene, kinematicChain &kinematicChainInstance);
+    uiManager(sceneManager &scene, chainKinematics &kinematicChainInstance);
     void render();
     void setupUI();
     void handleKinematics();
@@ -20,7 +20,7 @@ public:
 
 private:
     sceneManager &scene;
-    kinematicChain &kinematicChainInstance;
+    chainKinematics &kinematicChainInstance;
     ImguiFunctionalContext ui;
     bool isHovered = false;
     bool isInteracting = false;
