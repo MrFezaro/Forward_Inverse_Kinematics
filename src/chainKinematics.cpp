@@ -55,9 +55,11 @@ bool chainKinematics::inverseKinematicsCCD() {
             auto [x, y] = forwardKinematics();
 
             const float jointX = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * cos(jointAngles[0])
-                                                                 : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
+            : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
+
             const float jointY = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * sin(jointAngles[0])
-                                                                 : linkLengths[0] * sin(jointAngles[0]) + linkLengths[1] * sin(jointAngles[0] + jointAngles[1]);
+            : linkLengths[0] * sin(jointAngles[0]) + linkLengths[1] * sin(jointAngles[0] + jointAngles[1]);
+
             const float endEffectorX = x;
             const float endEffectorY = y;
 
