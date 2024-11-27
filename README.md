@@ -31,7 +31,7 @@ threepp library. It provides a visual representation and control interface for m
 
 - **threepp:** A C++ library for 3D graphics
   (https://github.com/markaren/threepp)
-- **ImGui:** A bloat-free graphical user interface for C++
+- **ImGui:** A graphical user interface for C++
   (https://github.com/ocornut/imgui)
 
 ## UML Class Diagram
