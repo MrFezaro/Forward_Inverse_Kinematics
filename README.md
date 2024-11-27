@@ -50,5 +50,5 @@ Make sure to have the following installed:
 - CMake 3.19 or later
 - A C++20 compatible compiler
 
-The project includes test functions which can be enabled by setting `PROJECT_BUILD_TESTS` to `ON` in the
+The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the
 `CMakeLists.txt` file.
