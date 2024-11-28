@@ -11,7 +11,7 @@ class ChainKinematics {
 public:
     ChainKinematics();
 
-    Point forwardKinematics() const;
+    [[nodiscard]] Point forwardKinematics() const;
     bool inverseKinematicsCCD();
 
     [[nodiscard]] const std::vector<float> &getLinkLengths() const;
@@ -25,7 +25,7 @@ public:
 private:
     std::vector<float> linkLengths = {2.0f, 2.0f, 2.0f};
     std::vector<float> jointAngles = {0.0f, 0.0f, 0.0f};
-    Point endEffectorPosition = {6.0f, 0.0f};
+    Point endEffector = {6.0f, 0.0f};
     Point target = {6.0f, 0.0f};
 
     [[nodiscard]] static float normalizeAngle(float angle);
