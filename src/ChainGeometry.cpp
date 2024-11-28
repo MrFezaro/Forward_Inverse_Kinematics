@@ -2,15 +2,15 @@
 
 using namespace threepp;
 
-chainGeometry::chainGeometry(Scene &scene, chainKinematics &chain) : scene(scene), chain(chain) {}
+ChainGeometry::ChainGeometry(Scene &scene, ChainKinematics &chain) : scene(scene), chain(chain) {}
 
-std::shared_ptr<Mesh> chainGeometry::createJoint(const BoxGeometry::Params &params, const Color &color) {
+std::shared_ptr<Mesh> ChainGeometry::createJoint(const BoxGeometry::Params &params, const Color &color) {
     const auto geometry = BoxGeometry::create(params);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     return Mesh::create(geometry, material);
 }
 
-std::shared_ptr<Mesh> chainGeometry::createLink(const float length, const float radius, const Color &color) {
+std::shared_ptr<Mesh> ChainGeometry::createLink(const float length, const float radius, const Color &color) {
     const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     auto link = Mesh::create(geometry, material);
@@ -18,13 +18,13 @@ std::shared_ptr<Mesh> chainGeometry::createLink(const float length, const float 
     return link;
 }
 
-std::shared_ptr<Mesh> chainGeometry::createSphere(const float radius, const Color &color) {
+std::shared_ptr<Mesh> ChainGeometry::createSphere(const float radius, const Color &color) {
     const auto geometry = SphereGeometry::create(radius, 32, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     return Mesh::create(geometry, material);
 }
 
-void chainGeometry::create() {
+void ChainGeometry::create() {
     // Create base
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
     const auto base = createJoint(baseParams, Color::white);

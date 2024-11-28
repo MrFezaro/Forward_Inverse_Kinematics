@@ -1,15 +1,15 @@
 #include "animationLoop.hpp"
-#include "chainGeometry.hpp"
-#include "chainKinematics.hpp"
-#include "sceneManager.hpp"
-#include "uiManager.hpp"
-
-sceneManager scene;
-chainKinematics kinematicChain{};
-uiManager ui(scene, kinematicChain);
-chainGeometry chainGeometry(scene.scene, kinematicChain);
+#include "ChainGeometry.hpp"
+#include "ChainKinematics.hpp"
+#include "SceneManager.hpp"
+#include "UiManager.hpp"
 
 int main() {
+    SceneManager scene;
+    ChainKinematics kinematicChain{};
+    UiManager ui(scene, kinematicChain);
+    ChainGeometry chainGeometry(scene.scene, kinematicChain);
+
     ui.render();
     chainGeometry.create();
     runAnimationLoop(scene, kinematicChain, ui, chainGeometry);

@@ -1,11 +1,11 @@
 #ifndef ANIMATIONLOOP_HPP
 #define ANIMATIONLOOP_HPP
 
-#include "chainGeometry.hpp"
-#include "chainKinematics.hpp"
-#include "sceneManager.hpp"
-#include "uiManager.hpp"
+#include "ChainGeometry.hpp"
+#include "ChainKinematics.hpp"
+#include "SceneManager.hpp"
+#include "UiManager.hpp"
 
-void runAnimationLoop(sceneManager &scene, chainKinematics &kinematicChain, uiManager &ui, chainGeometry &chainGeometry);
+void runAnimationLoop(SceneManager &scene, ChainKinematics &kinematicChain, UiManager &ui, ChainGeometry &chainGeometry);
 
 #endif// ANIMATIONLOOP_HPP

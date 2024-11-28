@@ -1,8 +1,8 @@
+#include <cmath>
+#include <numbers>
 #include "uiManager.hpp"
-#include "chainGeometry.hpp"
-#include "chainKinematics.hpp"
 
-uiManager::uiManager(sceneManager &scene, chainKinematics &kinematicChainInstance)
+UiManager::UiManager(SceneManager &scene, ChainKinematics &kinematicChainInstance)
     : scene(scene), kinematicChainInstance(kinematicChainInstance), ui(scene.canvas.windowPtr(), [&] {
           setupUI();
           handleKinematics();
@@ -11,11 +11,11 @@ uiManager::uiManager(sceneManager &scene, chainKinematics &kinematicChainInstanc
           scene.controls.enabled = !(isHovered || isInteracting);
       }) {}
 
-void uiManager::render() {
+void UiManager::render() {
     ui.render();
 }
 
-void uiManager::setupUI() {
+void UiManager::setupUI() {
     ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
     ImGui::SetNextWindowSize({320, 0}, 0);
     ImGui::Begin("Joint Controls");
@@ -24,16 +24,16 @@ void uiManager::setupUI() {
     isInteracting = ImGui::IsAnyItemActive();
 }
 
-void uiManager::handleKinematics() {
+void UiManager::handleKinematics() {
     if (ImGui::Button(isForwardKinematics ? "Switch to Inverse Kinematics" : "Switch to Forward Kinematics")) {
         isForwardKinematics = !isForwardKinematics;
         paramsChanged = true;
     }
 
     if (isForwardKinematics) {
-        float angle1 = kinematicChainInstance.getJointAngles()[0] * (180.0f / M_PI);
-        float angle2 = kinematicChainInstance.getJointAngles()[1] * (180.0f / M_PI);
-        float angle3 = kinematicChainInstance.getJointAngles()[2] * (180.0f / M_PI);
+        float angle1 = kinematicChainInstance.getJointAngles()[0] * (180.0f / std::numbers::pi);
+        float angle2 = kinematicChainInstance.getJointAngles()[1] * (180.0f / std::numbers::pi);
+        float angle3 = kinematicChainInstance.getJointAngles()[2] * (180.0f / std::numbers::pi);
 
         if (ImGui::SliderFloat("Angle Joint 1", &angle1, 0.0f, 360.0f)) {
             kinematicChainInstance.setJointAngles(0, angle1);
@@ -50,7 +50,7 @@ void uiManager::handleKinematics() {
             paramsChanged = true;
         }
 
-        if (std::abs(angle1 - 69.0f) < 0.5f || std::abs(angle2 - 69.0f) < 0.5f || std::abs(angle3 - 69.0f) < 0.5f) {
+        if (std::abs(angle1 - 69.0f) < 0.5f && std::abs(angle2 - 69.0f) < 0.5f && std::abs(angle3 - 69.0f) < 0.5f) {
             ImGui::TextColored(ImVec4(1.0, 0.84, 0.0, 1.0), "Nice");
         }
 
@@ -61,7 +61,7 @@ void uiManager::handleKinematics() {
         ImGui::Text("Y: %.2f", y);
 
     } else {
-        point target = kinematicChainInstance.getTarget();
+        Point target = kinematicChainInstance.getTarget();
         if (ImGui::SliderFloat("Target X", &target.x, -10.0f, 10.0f)) {
             kinematicChainInstance.setTarget(target);
             paramsChanged = true;
@@ -74,9 +74,9 @@ void uiManager::handleKinematics() {
 
         const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
         ImGui::Text("Calculated Angles:");
-        ImGui::Text("Angle Joint 1: %.2f", jointAngles[0] * (180.0f / M_PI));
-        ImGui::Text("Angle Joint 2: %.2f", jointAngles[1] * (180.0f / M_PI));
-        ImGui::Text("Angle Joint 3: %.2f", jointAngles[2] * (180.0f / M_PI));
+        ImGui::Text("Angle Joint 1: %.2f", jointAngles[0] * (180.0f / std::numbers::pi));
+        ImGui::Text("Angle Joint 2: %.2f", jointAngles[1] * (180.0f / std::numbers::pi));
+        ImGui::Text("Angle Joint 3: %.2f", jointAngles[2] * (180.0f / std::numbers::pi));
 
         if (!kinematicChainInstance.inverseKinematicsCCD()) {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Target is out of bounds!");
@@ -84,7 +84,7 @@ void uiManager::handleKinematics() {
     }
 }
 
-void uiManager::handleLinkLengths() {
+void UiManager::handleLinkLengths() {
     float link1 = kinematicChainInstance.getLinkLengths()[0];
     float link2 = kinematicChainInstance.getLinkLengths()[1];
     float link3 = kinematicChainInstance.getLinkLengths()[2];
@@ -103,7 +103,7 @@ void uiManager::handleLinkLengths() {
     }
 }
 
-void uiManager::handleReset() {
+void UiManager::handleReset() {
     if (ImGui::Button("Reset")) {
         kinematicChainInstance.setJointAngles(0, 0.0f);
         kinematicChainInstance.setJointAngles(1, 0.0f);

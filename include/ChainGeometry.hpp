@@ -2,11 +2,11 @@
 #define GEOMETRYHELPERS_HPP
 
 #include <threepp/threepp.hpp>
-#include "chainKinematics.hpp"
+#include "ChainKinematics.hpp"
 
-class chainGeometry {
+class ChainGeometry {
 public:
-    chainGeometry(threepp::Scene &scene, chainKinematics &chain);
+    ChainGeometry(threepp::Scene &scene, ChainKinematics &chain);
 
     void create();
 
@@ -20,7 +20,7 @@ public:
 
 private:
     threepp::Scene &scene;
-    chainKinematics &chain;
+    ChainKinematics &chain;
 
     static std::shared_ptr<threepp::Mesh> createJoint(const threepp::BoxGeometry::Params &params, const threepp::Color &color);
     static std::shared_ptr<threepp::Mesh> createLink(float length, float radius, const threepp::Color &color);

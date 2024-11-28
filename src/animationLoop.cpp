@@ -2,7 +2,7 @@
 
 using namespace threepp;
 
-void runAnimationLoop(sceneManager &scene, chainKinematics &kinematicChainInstance, uiManager &ui, chainGeometry &chainGeometry) {
+void runAnimationLoop(SceneManager &scene, ChainKinematics &kinematicChainInstance, UiManager &ui, ChainGeometry &chainGeometry) {
     Clock clock;
     scene.canvas.animate([&]() {
         scene.renderer.render(scene.scene, scene.camera);

@@ -3,9 +3,9 @@
 
 #include <threepp/threepp.hpp>
 
-class sceneManager {
+class SceneManager {
 public:
-    sceneManager();
+    SceneManager();
 
     threepp::Canvas canvas;
     threepp::GLRenderer renderer;
