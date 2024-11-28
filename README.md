@@ -15,7 +15,7 @@ threepp library. It provides a visual representation and control interface for m
 ## Features
 
 - **Forward Kinematics:** Calculate the end effector position based on given joint angles.
-- **Inverse Kinematics:** Determine the required joint angles to achieve a desired end effector position.
+- **Inverse Kinematics:** Determine the required joint angles to achieve a desired end effector position using cyclic coordinate decent.
 - **Dynamic Link Length:** Change the length of the links to observe the effect on the arm's movement.
 - **Interactive UI:** Use ImGui for real-time control and visualization of the kinematics.
 - **3D Visualization:** Render the arm and its joints in a 3D environment.
