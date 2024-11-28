@@ -31,28 +31,24 @@ threepp library. It provides a visual representation and control interface for m
 
 - **threepp:** A C++ library for 3D graphics
   (https://github.com/markaren/threepp)
-- **ImGui:** A bloat-free graphical user interface for C++
+- **ImGui:** A graphical user interface for C++
   (https://github.com/ocornut/imgui)
-- **GLFW:** A library for creating windows with OpenGL contexts
-  (https://www.glfw.org/)
 
 ## UML Class Diagram
 
-![UML Diagram](UML_Diagram.png)
+![UML Diagram](docs/assets/UML_Diagram.png)
 
 ## Main Scripts
 
 - **main.cpp:** Entry point of the application, sets up the scene and handles user interaction through ImGui.
-- **Kinematics.cpp:** Contains the implementation of the forward and inverse kinematics algorithms.
+- **testFunctions.cpp:**  Tests different functions for the chain kinematics class.
 
-## Installation Instructions
+## Additional Information
 
 Make sure to have the following installed:
 
 - CMake 3.19 or later
 - A C++20 compatible compiler
 
-## Additional Information
-
-The project includes test functions which can be enabled by setting `PROJECT_BUILD_TESTS` to `ON` in the
+The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the
 `CMakeLists.txt` file.
