@@ -14,7 +14,6 @@ public:
     Point forwardKinematics() const;
     bool inverseKinematicsCCD();
 
-    [[nodiscard]] static float normalizeAngle(float angle);
     [[nodiscard]] const std::vector<float> &getLinkLengths() const;
     [[nodiscard]] const std::vector<float> &getJointAngles() const;
     [[nodiscard]] Point getTarget() const;
@@ -29,6 +28,7 @@ private:
     Point endEffectorPosition = {6.0f, 0.0f};
     Point target = {6.0f, 0.0f};
 
+    [[nodiscard]] static float normalizeAngle(float angle);
     [[nodiscard]] static std::vector<std::vector<float>> transformationMatrix(float angle, float length);
     [[nodiscard]] static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);
 };

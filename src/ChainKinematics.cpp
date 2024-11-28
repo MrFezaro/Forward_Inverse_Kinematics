@@ -1,6 +1,7 @@
+#include "ChainKinematics.hpp"
 #include <cmath>
 #include <numbers>
-#include "chainKinematics.hpp"
+#include <stdexcept>
 
 ChainKinematics::ChainKinematics() = default;
 
@@ -57,10 +58,10 @@ bool ChainKinematics::inverseKinematicsCCD() {
             auto [x, y] = forwardKinematics();
 
             const float jointX = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * cos(jointAngles[0])
-            : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
+                                                                 : linkLengths[0] * cos(jointAngles[0]) + linkLengths[1] * cos(jointAngles[0] + jointAngles[1]);
 
             const float jointY = (joint == 0) ? 0 : (joint == 1) ? linkLengths[0] * sin(jointAngles[0])
-            : linkLengths[0] * sin(jointAngles[0]) + linkLengths[1] * sin(jointAngles[0] + jointAngles[1]);
+                                                                 : linkLengths[0] * sin(jointAngles[0]) + linkLengths[1] * sin(jointAngles[0] + jointAngles[1]);
 
             const float endEffectorX = x;
             const float endEffectorY = y;
@@ -80,15 +81,23 @@ bool ChainKinematics::inverseKinematicsCCD() {
 }
 
 void ChainKinematics::setLinkLength(const int linkNumber, const float newLength) {
-    if (linkNumber >= 0 && linkNumber < linkLengths.size()) {
-        linkLengths[linkNumber] = newLength;
+    if (linkNumber < 0 || linkNumber >= linkLengths.size()) {
+        throw std::out_of_range("Invalid link number");
     }
+    if (newLength <= 0) {
+        throw std::invalid_argument("Link length must be positive");
+    }
+    linkLengths[linkNumber] = newLength;
 }
 
 void ChainKinematics::setJointAngles(const int jointNumber, const float newAngle) {
-    if (jointNumber >= 0 && jointNumber < jointAngles.size()) {
-        jointAngles[jointNumber] = newAngle * (std::numbers::pi / 180.0f);
+    if (jointNumber < 0 || jointNumber >= jointAngles.size()) {
+        throw std::out_of_range("Invalid joint number");
     }
+    if (newAngle < 0 || newAngle >= 360) {
+        throw std::out_of_range("Joint angle must be between 0 and 360 degrees");
+    }
+    jointAngles[jointNumber] = newAngle * (std::numbers::pi / 180.0f);
 }
 
 void ChainKinematics::setTarget(const Point &newTarget) {

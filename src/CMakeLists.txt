@@ -1,8 +1,8 @@
-add_executable(kinematics_demo "main.cpp"
-        chainGeometry.cpp
-        sceneManager.cpp
-        chainKinematics.cpp
-        uiManager.cpp
+add_library(kinematicsLib
         animationLoop.cpp
-)
-target_include_directories(kinematics_demo PUBLIC "${CMAKE_SOURCE_DIR}/include")
+        ChainGeometry.cpp
+        ChainKinematics.cpp
+        SceneManager.cpp
+        UiManager.cpp)
+target_link_libraries(kinematicsLib PRIVATE threepp::threepp imgui::imgui)
+target_include_directories(kinematicsLib PUBLIC "${CMAKE_SOURCE_DIR}/include")

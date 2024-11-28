@@ -1,6 +1,6 @@
+#include "uiManager.hpp"
 #include <cmath>
 #include <numbers>
-#include "uiManager.hpp"
 
 UiManager::UiManager(SceneManager &scene, ChainKinematics &kinematicChainInstance)
     : scene(scene), kinematicChainInstance(kinematicChainInstance), ui(scene.canvas.windowPtr(), [&] {
