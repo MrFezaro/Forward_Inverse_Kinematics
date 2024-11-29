@@ -1,9 +1,9 @@
 #ifndef UIMANAGER_HPP
 #define UIMANAGER_HPP
 
+#include <threepp/extras/imgui/ImguiContext.hpp>
 #include "ChainKinematics.hpp"
 #include "SceneManager.hpp"
-#include <threepp/extras/imgui/ImguiContext.hpp>
 
 class UiManager {
 public:
@@ -13,13 +13,14 @@ public:
     void handleKinematics();
     void handleLinkLengths();
     void handleReset();
-    bool paramsChanged = false;
-    bool isForwardKinematics = true;
+    [[nodiscard]] bool checkParamsChanged() const;
 
 private:
     SceneManager &scene;
     ChainKinematics &kinematicChainInstance;
     ImguiFunctionalContext ui;
+    bool paramsChanged = false;
+    bool isForwardKinematics = true;
     bool isHovered = false;
     bool isInteracting = false;
 };

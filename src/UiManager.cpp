@@ -15,6 +15,10 @@ void UiManager::render() {
     ui.render();
 }
 
+bool UiManager::checkParamsChanged() const {
+    return paramsChanged;
+}
+
 void UiManager::setupUI() {
     ImGui::SetNextWindowPos({0, 0}, 0, {0, 0});
     ImGui::SetNextWindowSize({320, 0}, 0);

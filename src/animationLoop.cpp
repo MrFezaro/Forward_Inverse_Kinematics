@@ -9,9 +9,7 @@ void runAnimationLoop(SceneManager &scene, ChainKinematics &kinematicChainInstan
 
         ui.render();
 
-        if (ui.paramsChanged) {
-            ui.paramsChanged = false;
-
+        if (ui.checkParamsChanged()) {
             const std::vector<float> &jointAngles = kinematicChainInstance.getJointAngles();
             const std::vector<float> &linkLengths = kinematicChainInstance.getLinkLengths();
 
