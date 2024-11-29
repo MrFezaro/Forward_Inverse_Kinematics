@@ -20,8 +20,8 @@ TEST_CASE("Forward Kinematics - Valid Case", "[forwardKinematics]") {
     initializeChainKinematics(ck, {2.0, 1.5, 1.0}, {30, 45, 60});
     auto [x, y] = ck.forwardKinematics();
 
-    REQUIRE(x == Approx(1.41).epsilon(0.01));// Expected x-coordinate
-    REQUIRE(y == Approx(3.16).epsilon(0.01));// Expected y-coordinate
+    CHECK(x == Approx(1.41).epsilon(0.01));// Expected x-coordinate
+    CHECK(y == Approx(3.16).epsilon(0.01));// Expected y-coordinate
 }
 
 TEST_CASE("Inverse Kinematics - Target is Reachable", "[inverseKinematicsCCD]") {
@@ -43,7 +43,7 @@ TEST_CASE("Inverse Kinematics - Target is Unreachable", "[inverseKinematicsCCD]"
     ck.setTarget({10.0, 10.0});// Out of range target
 
     const bool result = ck.inverseKinematicsCCD();
-    REQUIRE(result == false);// Cannot reach this target
+    CHECK(result == false);// Cannot reach this target
 }
 
 TEST_CASE("Set and Get Joint Angles - Valid Case", "[jointAngles]") {

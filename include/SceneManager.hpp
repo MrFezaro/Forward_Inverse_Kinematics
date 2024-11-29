@@ -3,6 +3,13 @@
 
 #include <threepp/threepp.hpp>
 
+/**
+ * @class SceneManager
+ * @brief Manages the 3D scene, including the canvas, renderer, camera, and controls.
+ *
+ * This class is responsible for setting up and managing the 3D scene, including the canvas for rendering,
+ * the renderer, the scene graph, the camera, and the orbit controls for user interaction.
+ */
 class SceneManager {
 public:
     SceneManager();

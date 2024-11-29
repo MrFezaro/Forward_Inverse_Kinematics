@@ -2,7 +2,7 @@
 
 using namespace threepp;
 
-ChainGeometry::ChainGeometry(Scene &scene, ChainKinematics &chain) : scene(scene), chain(chain) {}
+ChainGeometry::ChainGeometry(Scene &scene, ChainKinematics &chainKinematics) : scene_(scene), chain_(chainKinematics) {}
 
 std::shared_ptr<Mesh> ChainGeometry::createJoint(const BoxGeometry::Params &params, const Color &color) {
     const auto geometry = BoxGeometry::create(params);
@@ -28,7 +28,7 @@ void ChainGeometry::create() {
     // Create base
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
     const auto base = createJoint(baseParams, Color::white);
-    scene.add(base);
+    scene_.add(base);
     base->position.y = 2.0f;
     base->rotation.y = math::degToRad(180);// Rotate base to align with world
 
@@ -71,8 +71,8 @@ void ChainGeometry::create() {
     sphere->position.y = -1.0f;// Position the sphere at the end of joint3
 
     // Apply initial rotations and lengths to the joints and links
-    const std::vector<float> jointAngles = chain.getJointAngles();
-    const std::vector<float> linkLengths = chain.getLinkLengths();
+    const std::vector<float> jointAngles = chain_.getJointAngles();
+    const std::vector<float> linkLengths = chain_.getLinkLengths();
 
     joint1->rotation.z = jointAngles[0];
     joint2->rotation.z = jointAngles[1];

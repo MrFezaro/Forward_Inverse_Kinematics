@@ -5,24 +5,31 @@
 #include "ChainKinematics.hpp"
 #include "SceneManager.hpp"
 
+/**
+ * @class UiManager
+ * @brief Manages the user interface for the kinematic chain simulation.
+ *
+ * This class is responsible for setting up and rendering the user interface, handling user interactions,
+ * and updating the kinematic chain parameters based on user input.
+ */
 class UiManager {
 public:
-    UiManager(SceneManager &scene, ChainKinematics &kinematicChainInstance);
+    UiManager(SceneManager &scene, ChainKinematics &chainKinematics);
     void render();
     void setupUI();
     void handleKinematics();
     void handleLinkLengths();
     void handleReset();
-    [[nodiscard]] bool checkParamsChanged() const;
+    bool checkParamsChanged();
 
 private:
-    SceneManager &scene;
-    ChainKinematics &kinematicChainInstance;
-    ImguiFunctionalContext ui;
-    bool paramsChanged = false;
-    bool isForwardKinematics = true;
-    bool isHovered = false;
-    bool isInteracting = false;
+    SceneManager &scene_;
+    ChainKinematics &chainKinematics_;
+    ImguiFunctionalContext ui_;
+    bool paramsChanged_ = true;
+    bool isForwardKinematics_ = true;
+    bool isHovered_ = false;
+    bool isInteracting_ = false;
 };
 
 #endif// UIMANAGER_HPP
