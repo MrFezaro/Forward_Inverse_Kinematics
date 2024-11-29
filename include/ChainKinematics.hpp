@@ -37,12 +37,12 @@ public:
      */
     bool inverseKinematicsCCD();
 
-    [[nodiscard]] const std::vector<float> &getLinkLengths() const;
-    [[nodiscard]] const std::vector<float> &getJointAngles() const;
+    [[nodiscard]] float getLinkLength(int linkNumber) const;
+    [[nodiscard]] float getJointAngle(int jointNumber) const;
     [[nodiscard]] Point getTarget() const;
 
     void setLinkLength(int linkNumber, float newLength);
-    void setJointAngles(int jointNumber, float newAngle);
+    void setJointAngle(int jointNumber, float newAngle);
     void setTarget(const Point &newTarget);
 
 private:

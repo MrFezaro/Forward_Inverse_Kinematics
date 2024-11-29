@@ -24,67 +24,63 @@ std::shared_ptr<Mesh> ChainGeometry::createSphere(const float radius, const Colo
     return Mesh::create(geometry, material);
 }
 
-void ChainGeometry::create() {
-    // Create base
+void ChainGeometry::createBase() {
     const BoxGeometry::Params baseParams{1.0f, 1.0f, 1.0f};
-    const auto base = createJoint(baseParams, Color::white);
+    base = createJoint(baseParams, Color::white);
     scene_.add(base);
     base->position.y = 2.0f;
     base->rotation.y = math::degToRad(180);// Rotate base to align with world
+}
 
-    // Create joints
+void ChainGeometry::createJointsAndLinks() {
     const BoxGeometry::Params jointParams{0.5f, 0.5f, 0.5f};
-    joint1 = createJoint(jointParams, Color::green);
-    joint2 = createJoint(jointParams, Color::red);
-    joint3 = createJoint(jointParams, Color::blue);
+    const Color jointColors[] = {Color::green, Color::red, Color::blue};
+    const Color linkColor = Color::yellow;
 
-    // Create links (cylinders)
-    link1 = createLink(1.0f, 0.125f, Color::yellow);
-    link2 = createLink(1.0f, 0.125f, Color::yellow);
-    link3 = createLink(1.0f, 0.125f, Color::yellow);
+    for (int i = 0; i < 3; ++i) {
+        joints[i] = createJoint(jointParams, jointColors[i]);
+        links[i] = createLink(1.0f, 0.125f, linkColor);
+        links[i]->rotation.z = math::degToRad(90);
+        links[i]->rotation.y = math::degToRad(90);
+    }
 
-    // Attach joints hierarchically
-    base->add(joint1);
-    joint1->add(link1);                    // Attach link1 between base and joint1
-    joint1->position.y = -1.0f;            // Position joint1 below base
-    link1->position.y = -0.5f;             // Position link1 between base and joint1
-    link1->rotation.z = math::degToRad(90);// Rotate link1 to align with joint1
-    link1->rotation.y = math::degToRad(90);// Rotate link1 to align with joint1
+    base->add(joints[0]);
+    joints[0]->add(links[0]);
+    joints[0]->position.y = -1.0f;
+    links[0]->position.y = -0.5f;
 
-    joint1->add(joint2);
-    joint2->add(link2);                    // Attach link2 between joint1 and joint2
-    joint2->position.y = -1.0f;            // Position joint2 between joint1 and joint3
-    link2->position.y = -0.5f;             // Position link2 between joint1 and joint2
-    link2->rotation.z = math::degToRad(90);// Rotate link2 to align with joint2
-    link2->rotation.y = math::degToRad(90);// Rotate link2 to align with joint2
+    for (int i = 1; i < 3; ++i) {
+        joints[i - 1]->add(joints[i]);
+        joints[i]->add(links[i]);
+        joints[i]->position.y = -1.0f;
+        links[i]->position.y = -0.5f;
+    }
+}
 
-    joint2->add(joint3);
-    joint3->add(link3);                    // Attach link3 between joint2 and joint3
-    joint3->position.y = -1.0f;            // Position joint3 between joint2 and sphere
-    link3->position.y = -0.5f;             // Position link3 between joint2 and joint3
-    link3->rotation.z = math::degToRad(90);// Rotate link3 to align with joint3
-    link3->rotation.y = math::degToRad(90);// Rotate link3 to align with joint3
+void ChainGeometry::createSphereAtEnd() {
+    sphere = createSphere(0.3f, Color::white);
+    joints[2]->add(sphere);
+    sphere->position.y = -1.0f;
+}
 
-    // Create and attach a sphere to the end of joint3
-    sphere = createSphere(0.3f, Color::white);// Sphere with radius 0.3
-    joint3->add(sphere);
-    sphere->position.y = -1.0f;// Position the sphere at the end of joint3
+void ChainGeometry::applyInitialTransformations() {
+    for (int i = 0; i < 3; ++i) {
+        joints[i]->rotation.z = chain_.getJointAngle(i);
+        links[i]->scale.y = chain_.getLinkLength(i);
+    }
 
-    // Apply initial rotations and lengths to the joints and links
-    const std::vector<float> jointAngles = chain_.getJointAngles();
-    const std::vector<float> linkLengths = chain_.getLinkLengths();
+    joints[0]->position.y = -1.0f;
+    links[0]->position.y = -chain_.getLinkLength(0) / 2.0f;
+    joints[1]->position.y = -chain_.getLinkLength(0);
+    links[1]->position.y = -chain_.getLinkLength(1) / 2.0f;
+    joints[2]->position.y = -chain_.getLinkLength(1);
+    links[2]->position.y = -chain_.getLinkLength(2) / 2.0f;
+    sphere->position.y = -chain_.getLinkLength(2);
+}
 
-    joint1->rotation.z = jointAngles[0];
-    joint2->rotation.z = jointAngles[1];
-    joint3->rotation.z = jointAngles[2];
-    link1->scale.y = linkLengths[0];
-    link2->scale.y = linkLengths[1];
-    link3->scale.y = linkLengths[2];
-    joint1->position.y = -1.0f;// Fix joint1 position relative to the base
-    link1->position.y = -linkLengths[0] / 2.0f;
-    joint2->position.y = -linkLengths[0];      // Position joint2 based on lengthLink1
-    link2->position.y = -linkLengths[1] / 2.0f;// Position link2 between joint2 and joint3
-    joint3->position.y = -linkLengths[1];      // Position joint3 based on lengthLink2
-    link3->position.y = -linkLengths[2] / 2.0f;// Position link3 between joint3 and sphere
-    sphere->position.y = -linkLengths[2];      // Position the sphere at the end of link3
+void ChainGeometry::create() {
+    createBase();
+    createJointsAndLinks();
+    createSphereAtEnd();
+    applyInitialTransformations();
 }

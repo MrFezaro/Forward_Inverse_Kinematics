@@ -17,7 +17,6 @@
  * @param ui Reference to the UiManager instance managing the user interface.
  * @param chainGeometry Reference to the ChainGeometry instance managing the geometry of the kinematic chain.
  */
-
 void runAnimationLoop(SceneManager &scene, const ChainKinematics &chainKinematics, UiManager &ui, const ChainGeometry &chainGeometry);
 
-#endif// ANIMATIONLOOP_HPP
+#endif // ANIMATIONLOOP_HPP

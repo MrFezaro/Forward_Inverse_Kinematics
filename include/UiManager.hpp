@@ -1,9 +1,9 @@
 #ifndef UIMANAGER_HPP
 #define UIMANAGER_HPP
 
-#include <threepp/extras/imgui/ImguiContext.hpp>
 #include "ChainKinematics.hpp"
 #include "SceneManager.hpp"
+#include <threepp/extras/imgui/ImguiContext.hpp>
 
 /**
  * @class UiManager
@@ -19,7 +19,9 @@ public:
     void setupUI();
     void handleKinematics();
     void handleLinkLengths();
+    void handleAnimations();
     void handleReset();
+    void openLink(std::string &url);
     bool checkParamsChanged();
 
 private:

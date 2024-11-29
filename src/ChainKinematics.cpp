@@ -91,7 +91,7 @@ void ChainKinematics::setLinkLength(const int linkNumber, const float newLength)
     linkLengths_[linkNumber] = newLength;
 }
 
-void ChainKinematics::setJointAngles(const int jointNumber, const float newAngle) {
+void ChainKinematics::setJointAngle(const int jointNumber, const float newAngle) {
     if (jointNumber < 0 || jointNumber >= jointAngles_.size()) {
         throw std::out_of_range("Invalid joint number: " + std::to_string(jointNumber));
     }
@@ -105,12 +105,18 @@ void ChainKinematics::setTarget(const Point &newTarget) {
     target_ = newTarget;
 }
 
-const std::vector<float> &ChainKinematics::getLinkLengths() const {
-    return linkLengths_;
+float ChainKinematics::getLinkLength(const int linkNumber) const {
+    if (linkNumber < 0 || linkNumber >= linkLengths_.size()) {
+        throw std::out_of_range("Invalid link number: " + std::to_string(linkNumber));
+    }
+    return linkLengths_[linkNumber];
 }
 
-const std::vector<float> &ChainKinematics::getJointAngles() const {
-    return jointAngles_;
+float ChainKinematics::getJointAngle(const int jointNumber) const {
+    if (jointNumber < 0 || jointNumber >= jointAngles_.size()) {
+        throw std::out_of_range("Invalid joint number: " + std::to_string(jointNumber));
+    }
+    return jointAngles_[jointNumber];
 }
 
 Point ChainKinematics::getTarget() const {

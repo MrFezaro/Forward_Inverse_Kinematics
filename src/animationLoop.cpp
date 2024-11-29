@@ -10,24 +10,18 @@ void runAnimationLoop(SceneManager &scene, const ChainKinematics &chainKinematic
         ui.render();
 
         if (ui.checkParamsChanged()) {
-            const std::vector<float> &jointAngles = chainKinematics.getJointAngles();
-            const std::vector<float> &linkLengths = chainKinematics.getLinkLengths();
+            for (int i = 0; i < 3; ++i) {
+                chainGeometry.joints[i]->rotation.z = chainKinematics.getJointAngle(i);
+                chainGeometry.links[i]->scale.y = chainKinematics.getLinkLength(i);
+            }
 
-            chainGeometry.joint1->rotation.z = jointAngles[0];
-            chainGeometry.joint2->rotation.z = jointAngles[1];
-            chainGeometry.joint3->rotation.z = jointAngles[2];
-
-            chainGeometry.link1->scale.y = linkLengths[0];
-            chainGeometry.link2->scale.y = linkLengths[1];
-            chainGeometry.link3->scale.y = linkLengths[2];
-
-            chainGeometry.joint1->position.y = -1.0f;
-            chainGeometry.link1->position.y = -linkLengths[0] / 2.0f;
-            chainGeometry.joint2->position.y = -linkLengths[0];
-            chainGeometry.link2->position.y = -linkLengths[1] / 2.0f;
-            chainGeometry.joint3->position.y = -linkLengths[1];
-            chainGeometry.link3->position.y = -linkLengths[2] / 2.0f;
-            chainGeometry.sphere->position.y = -linkLengths[2];
+            chainGeometry.joints[0]->position.y = -1.0f;
+            chainGeometry.links[0]->position.y = -chainKinematics.getLinkLength(0) / 2.0f;
+            chainGeometry.joints[1]->position.y = -chainKinematics.getLinkLength(0);
+            chainGeometry.links[1]->position.y = -chainKinematics.getLinkLength(1) / 2.0f;
+            chainGeometry.joints[2]->position.y = -chainKinematics.getLinkLength(1);
+            chainGeometry.links[2]->position.y = -chainKinematics.getLinkLength(2) / 2.0f;
+            chainGeometry.sphere->position.y = -chainKinematics.getLinkLength(2);
         }
     });
 }

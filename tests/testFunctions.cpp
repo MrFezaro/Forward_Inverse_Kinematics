@@ -7,11 +7,11 @@ using Catch::Approx;
 
 // Helper function to initialize a ChainKinematics instance
 void initializeChainKinematics(ChainKinematics &ck, const std::vector<float> &linkLengths, const std::vector<float> &jointAngles) {
-    for (size_t i = 0; i < linkLengths.size(); ++i) {
+    for (int i = 0; i < linkLengths.size(); ++i) {
         ck.setLinkLength(i, linkLengths[i]);
     }
-    for (size_t i = 0; i < jointAngles.size(); ++i) {
-        ck.setJointAngles(i, jointAngles[i]);
+    for (int i = 0; i < jointAngles.size(); ++i) {
+        ck.setJointAngle(i, jointAngles[i]);
     }
 }
 
@@ -50,28 +50,24 @@ TEST_CASE("Set and Get Joint Angles - Valid Case", "[jointAngles]") {
     ChainKinematics ck;
     initializeChainKinematics(ck, {2.0, 1.5, 1.0}, {45, 45, 45});
 
-    const auto &jointAngles = ck.getJointAngles();
-    REQUIRE(jointAngles.size() == 3);// Verify three joints
-    CHECK(jointAngles[0] == Approx(std::numbers::pi / 4));
-    CHECK(jointAngles[1] == Approx(std::numbers::pi / 4));
-    CHECK(jointAngles[2] == Approx(std::numbers::pi / 4));
+    for (int i = 0; i < 3; ++i) {
+        CHECK(ck.getJointAngle(i) == Approx(45 * std::numbers::pi / 180));
+    }
 }
 
 TEST_CASE("Set Joint Angles - Invalid Joint Index", "[jointAngles]") {
     ChainKinematics ck;
     initializeChainKinematics(ck, {2.0, 1.5, 1.0}, {0, 0, 0});
-    REQUIRE_THROWS_AS(ck.setJointAngles(3, 45), std::out_of_range);
+    REQUIRE_THROWS_AS(ck.setJointAngle(3, 45), std::out_of_range);
 }
 
 TEST_CASE("Set and Get Link Lengths - Valid Case", "[linkLengths]") {
     ChainKinematics ck;
     initializeChainKinematics(ck, {3.0f, 2.5f, 2.0f}, {0, 0, 0});
 
-    const auto &linkLengths = ck.getLinkLengths();
-    REQUIRE(linkLengths.size() == 3);// Verify three links
-    CHECK(linkLengths[0] == Approx(3.0f));
-    CHECK(linkLengths[1] == Approx(2.5f));
-    CHECK(linkLengths[2] == Approx(2.0f));
+    for (int i = 0; i < 3; ++i) {
+        CHECK(ck.getLinkLength(i) == Approx((i == 0 ? 3.0f : (i == 1 ? 2.5f : 2.0f))));
+    }
 }
 
 TEST_CASE("Set Link Lengths - Invalid Link Index", "[linkLengths]") {
