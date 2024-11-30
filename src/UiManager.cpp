@@ -1,7 +1,7 @@
 #include "uiManager.hpp"
 #include <numbers>
 #include <string>
-#include <windows.h>
+#include <cstdlib>
 
 UiManager::UiManager(SceneManager &scene, ChainKinematics &chainKinematics)
     : scene_(scene), chainKinematics_(chainKinematics), ui_(scene.canvas.windowPtr(), [&] {
@@ -100,15 +100,6 @@ void UiManager::handleReset() {
     }
 }
 
-// void UiManager::handleAnimations() {
-//     ImGui::Text("Animations:");
-//     if (ImGui::Button("Open Rick Roll")) {
-//         const std::string url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUXbmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXA%3D";
-//         ShellExecute(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-//         paramsChanged_ = true;
-//     }
-// }
-
 void UiManager::handleAnimations() {
     if (!isForwardKinematics_) {
         const char *items[] = {"None", "Square", "Sinus", "Circle", "Special"};
@@ -117,7 +108,7 @@ void UiManager::handleAnimations() {
         if (ImGui::Button(isAnimating_ ? "Stop Animation" : "Play Animation")) {
             isAnimating_ = !isAnimating_;
             if (!isAnimating_) {
-                animationTime_ = 0.0f;// Reset animation time when stopping
+                animationTime_ = 0.0f; //Reset animation time when stopping
             }
         }
         if (isAnimating_) {
@@ -129,18 +120,18 @@ void UiManager::handleAnimations() {
 void UiManager::updateAnimation() {
     float chainLength = 0.0f;
     for (int i = 0; i < 3; ++i) {
-        chainLength += chainKinematics_.getLinkLength(i) / 2.0f;// Halved to avoid the chain going out of bounds
+        chainLength += chainKinematics_.getLinkLength(i) / 2.0f; // Halved to avoid the chain going out of bounds
     }
     auto [x, y] = chainKinematics_.getTarget();
 
     const std::string url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUXbmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXA%3D";
 
-    animationTime_ += 0.02f;// Animation speed
+    animationTime_ += 0.02f; // Animation speed
 
     switch (currentAnimation_) {
-        case 0:// None
+        case 0: // None
             break;
-        case 1:// Square
+        case 1: // Square
             if (animationTime_ < 1.0f) {
                 const float t = animationTime_;
                 chainKinematics_.setTarget({chainLength * (1.0f - t) + (-chainLength * t),
@@ -161,18 +152,24 @@ void UiManager::updateAnimation() {
                 animationTime_ = 0.0f;
             }
             break;
-        case 2:                                                                                          // Sinus
-            chainKinematics_.setTarget({std::sin(animationTime_) * chainLength, animationTime_ - 3.14f});//Can't use std::numbers::pi because of double narrowing
+        case 2: // Sinus
+            chainKinematics_.setTarget({std::sin(animationTime_) * chainLength, animationTime_ - 3.14f});
             if (y > 3.14f) {
                 animationTime_ = 0.0f;
             }
             break;
-        case 3:// Circle
+        case 3: // Circle
             chainKinematics_.setTarget({(chainLength * std::cos(animationTime_)),
                                         (chainLength * std::sin(animationTime_))});
             break;
-        case 4:// Special
-            ShellExecute(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOW);
+        case 4: // Special
+            #ifdef _WIN32
+                 std::system(("start " + url).c_str());
+            #elif __APPLE__
+                 std::system(("open " + url).c_str());
+            #elif __linux__
+                 std::system(("xdg-open " + url).c_str());
+            #endif
             currentAnimation_ = 0;
             break;
         default:

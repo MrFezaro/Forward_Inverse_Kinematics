@@ -14,7 +14,7 @@ std::shared_ptr<Mesh> ChainGeometry::createLink(const float length, const float 
     const auto geometry = CylinderGeometry::create(radius, radius, length, 32);
     const auto material = MeshBasicMaterial::create({{"color", color}});
     auto link = Mesh::create(geometry, material);
-    link->rotation.x = math::degToRad(90);// Align along Y axis
+    link->rotation.x = math::degToRad(90); // Align along Y axis
     return link;
 }
 
@@ -29,7 +29,7 @@ void ChainGeometry::createBase() {
     base = createJoint(baseParams, Color::white);
     scene_.add(base);
     base->position.y = 2.0f;
-    base->rotation.y = math::degToRad(180);// Rotate base to align with world
+    base->rotation.y = math::degToRad(180); // Rotate base to align with world
 }
 
 void ChainGeometry::createJointsAndLinks() {
