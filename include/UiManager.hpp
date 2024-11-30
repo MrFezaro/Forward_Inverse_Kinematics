@@ -15,23 +15,28 @@
 class UiManager {
 public:
     UiManager(SceneManager &scene, ChainKinematics &chainKinematics);
-    void render();
+
     void setupUI();
+    void render();
+    void handleReset();
     void handleKinematics();
     void handleLinkLengths();
     void handleAnimations();
-    void handleReset();
-    void openLink(std::string &url);
+    void updateAnimation();
     bool checkParamsChanged();
 
 private:
     SceneManager &scene_;
     ChainKinematics &chainKinematics_;
     ImguiFunctionalContext ui_;
+
     bool paramsChanged_ = true;
     bool isForwardKinematics_ = true;
     bool isHovered_ = false;
     bool isInteracting_ = false;
+    bool isAnimating_ = false;
+    int currentAnimation_ = 0;
+    float animationTime_ = 0.0f;
 };
 
 #endif// UIMANAGER_HPP

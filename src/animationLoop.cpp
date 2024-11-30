@@ -6,7 +6,6 @@ void runAnimationLoop(SceneManager &scene, const ChainKinematics &chainKinematic
     Clock clock;
     scene.canvas.animate([&]() {
         scene.renderer.render(scene.scene, scene.camera);
-
         ui.render();
 
         if (ui.checkParamsChanged()) {
@@ -14,7 +13,6 @@ void runAnimationLoop(SceneManager &scene, const ChainKinematics &chainKinematic
                 chainGeometry.joints[i]->rotation.z = chainKinematics.getJointAngle(i);
                 chainGeometry.links[i]->scale.y = chainKinematics.getLinkLength(i);
             }
-
             chainGeometry.joints[0]->position.y = -1.0f;
             chainGeometry.links[0]->position.y = -chainKinematics.getLinkLength(0) / 2.0f;
             chainGeometry.joints[1]->position.y = -chainKinematics.getLinkLength(0);
