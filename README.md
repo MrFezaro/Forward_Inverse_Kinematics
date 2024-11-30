@@ -26,7 +26,7 @@ threepp library. It provides a visual representation and control interface for m
 - Use the switch to toggle between forward and inverse kinematics.
 - Drag the sliders to adjust the joint angles og target position.
 - Click reset to set the arm to its initial position.
-- Use the drop down menu in inverse kinematics mode to play different animations.
+- Play different animations in inverse kinematics mode using the drop down menu.
 
 ## Dependencies
 
