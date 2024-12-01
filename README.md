@@ -2,7 +2,7 @@
 
 #### Candidate Number: 10053
 
-<div style="text-align: center;">
+<div style="text-align: left;">
   <img src="docs/assets/Program_demo.gif" alt="Demo">
   <p>Full demo video <a href="https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming">here</a></p>
 </div>
