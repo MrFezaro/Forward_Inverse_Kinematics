@@ -3,7 +3,7 @@
 #### Candidate Number: 10053
 
 <div style="text-align: left;">
-  <img src="docs/assets/Program_demo.gif" alt="Demo">
+  <img src="docs/assets/Program_demo.gif" alt="Demo" width="500" height="auto">
   <p>Full demo video <a href="https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming">here</a></p>
 </div>
 
@@ -37,7 +37,7 @@ threepp library. It provides a visual representation and control interface for m
 
 ## UML Class Diagram
 
-![UML Diagram](docs/assets/UML_Diagram.png)
+<img src="docs/assets/UML_Diagram.png" alt="UML Diagram" width="500" height="auto">
 
 ## Main Scripts
 
@@ -51,5 +51,4 @@ Make sure to have the following installed:
 - CMake 3.19 or later
 - A C++20 compatible compiler
 
-The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the
-`CMakeLists.txt` file.
+The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the `CMakeLists.txt` file.
