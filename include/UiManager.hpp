@@ -17,18 +17,19 @@ public:
     UiManager(SceneManager &scene, ChainKinematics &chainKinematics);
 
     void setupUI();
-    void render();
-    void handleReset();
-    void handleKinematics();
-    void handleLinkLengths();
-    void handleAnimations();
-    void updateAnimation();
+    void render(float dt);
     bool checkParamsChanged();
 
 private:
     SceneManager &scene_;
     ChainKinematics &chainKinematics_;
     ImguiFunctionalContext ui_;
+
+    void handleReset();
+    void handleKinematics();
+    void handleLinkLengths();
+    void handleAnimations();
+    void updateAnimation();
 
     bool paramsChanged_ = true;
     bool isForwardKinematics_ = true;
@@ -37,6 +38,7 @@ private:
     bool isAnimating_ = false;
     int currentAnimation_ = 0;
     float animationTime_ = 0.0f;
+    float dt_ = 0.0f;
 };
 
 #endif// UIMANAGER_HPP

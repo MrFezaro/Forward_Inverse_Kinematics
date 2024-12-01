@@ -37,7 +37,7 @@ threepp library. It provides a visual representation and control interface for m
 
 ## UML Class Diagram
 
-![UML Diagram](docs/assets/UML_Diagram.jpg)
+![UML Diagram](docs/assets/UML_Diagram.png)
 
 ## Main Scripts
 

@@ -8,8 +8,8 @@ ChainKinematics::ChainKinematics() = default;
 
 std::vector<std::vector<float>> ChainKinematics::transformationMatrix(const float angle, const float length) {
     return {
-            {cos(angle), -sin(angle), length * cos(angle)},
-            {sin(angle), cos(angle), length * sin(angle)},
+            {std::cos(angle), -std::sin(angle), length * std::cos(angle)},
+            {std::sin(angle), std::cos(angle), length * std::sin(angle)},
             {0, 0, 1}};
 }
 
@@ -39,7 +39,7 @@ Point ChainKinematics::forwardKinematics() const {
 bool ChainKinematics::inverseKinematicsCCD() {
     const float maxReach = linkLengths_[0] + linkLengths_[1] + linkLengths_[2];
 
-    if (const float distanceToTarget = sqrt(target_.x * target_.x + target_.y * target_.y); distanceToTarget > maxReach) {
+    if (const float distanceToTarget = std::sqrt(target_.x * target_.x + target_.y * target_.y); distanceToTarget > maxReach) {
         return false;
     }
 
@@ -52,17 +52,17 @@ bool ChainKinematics::inverseKinematicsCCD() {
         const float errorX = target_.x - x;
         const float errorY = target_.y - y;
 
-        if (const float error = sqrt(errorX * errorX + errorY * errorY); error < tolerance) return true;
+        if (const float error = std::sqrt(errorX * errorX + errorY * errorY); error < tolerance) return true;
 
         for (int joint = 2; joint >= 0; --joint) {
             float &theta = jointAngles_[joint];
             auto [x, y] = forwardKinematics();
 
-            const float jointX = (joint == 0) ? 0 : (joint == 1) ? linkLengths_[0] * cos(jointAngles_[0])
-                                                                 : linkLengths_[0] * cos(jointAngles_[0]) + linkLengths_[1] * cos(jointAngles_[0] + jointAngles_[1]);
+            const float jointX = (joint == 0) ? 0 : (joint == 1) ? linkLengths_[0] * std::cos(jointAngles_[0])
+                                                                 : linkLengths_[0] * std::cos(jointAngles_[0]) + linkLengths_[1] * std::cos(jointAngles_[0] + jointAngles_[1]);
 
-            const float jointY = (joint == 0) ? 0 : (joint == 1) ? linkLengths_[0] * sin(jointAngles_[0])
-                                                                 : linkLengths_[0] * sin(jointAngles_[0]) + linkLengths_[1] * sin(jointAngles_[0] + jointAngles_[1]);
+            const float jointY = (joint == 0) ? 0 : (joint == 1) ? linkLengths_[0] * std::sin(jointAngles_[0])
+                                                                 : linkLengths_[0] * std::sin(jointAngles_[0]) + linkLengths_[1] * std::sin(jointAngles_[0] + jointAngles_[1]);
 
             const float endEffectorX = x;
             const float endEffectorY = y;
@@ -70,8 +70,8 @@ bool ChainKinematics::inverseKinematicsCCD() {
             const float targetX = target_.x - jointX;
             const float targetY = target_.y - jointY;
 
-            const float angleToTarget = atan2(targetY, targetX);
-            const float angleToEndEffector = atan2(endEffectorY - jointY, endEffectorX - jointX);
+            const float angleToTarget = std::atan2(targetY, targetX);
+            const float angleToEndEffector = std::atan2(endEffectorY - jointY, endEffectorX - jointX);
 
             theta += angleToTarget - angleToEndEffector;
 
@@ -98,7 +98,7 @@ void ChainKinematics::setJointAngle(const int jointNumber, const float newAngle)
     if (newAngle < 0 || newAngle > 360) {
         throw std::out_of_range("Joint angle " + std::to_string(jointNumber) + " (" + std::to_string(newAngle) + ") must be between 0 and 360 degrees ");
     }
-    jointAngles_[jointNumber] = newAngle * (std::numbers::pi / 180.0f);
+    jointAngles_[jointNumber] = newAngle * (std::numbers::pi_v<float> / 180.0f);
 }
 
 void ChainKinematics::setTarget(const Point &newTarget) {
@@ -124,7 +124,7 @@ Point ChainKinematics::getTarget() const {
 }
 
 float ChainKinematics::normalizeAngle(float angle) {
-    constexpr float TWO_PI = 2.0f * std::numbers::pi;
+    constexpr float TWO_PI = 2.0f * std::numbers::pi_v<float>;
     while (angle < 0) angle += TWO_PI;
     while (angle >= TWO_PI) angle -= TWO_PI;
     return angle;
