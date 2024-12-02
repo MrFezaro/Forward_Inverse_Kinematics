@@ -1,8 +1,8 @@
 #include "uiManager.hpp"
 #include <cmath>
+#include <cstdlib>
 #include <numbers>
 #include <string>
-#include <windows.h>
 
 UiManager::UiManager(SceneManager &scene, ChainKinematics &chainKinematics)
     : scene_(scene), chainKinematics_(chainKinematics), ui_(scene.canvas.windowPtr(), [&] {
@@ -71,7 +71,7 @@ void UiManager::handleKinematics() {
 
         ImGui::Text("Calculated Angles:");
         for (int i = 0; i < 3; ++i) {
-            ImGui::Text("Angle Joint %d: %.2f", i + 1, chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi_v<float>));
+            ImGui::Text("Angle Joint %d: %.2f", i + 1, chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi_v<float>) );
         }
 
         if (!chainKinematics_.inverseKinematicsCCD()) {
@@ -164,7 +164,13 @@ void UiManager::updateAnimation() {
                                         (chainLength * std::sin(animationTime_))});
             break;
         case 4: //Special
-            ShellExecute(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOW);
+#ifdef _WIN32
+            std::system(("start " + url).c_str());
+#elif __APPLE__
+            std::system(("open " + url).c_str());
+#elif __linux__
+            std::system(("xdg-open " + url).c_str());
+#endif
             currentAnimation_ = 0;
             break;
         default:
