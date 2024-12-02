@@ -6,7 +6,8 @@ void runAnimationLoop(SceneManager &scene, const ChainKinematics &chainKinematic
     Clock clock;
     scene.canvas.animate([&]() {
         scene.renderer.render(scene.scene, scene.camera);
-        ui.render();
+        const float dt = clock.getDelta();
+        ui.render(dt);
 
         if (ui.checkParamsChanged()) {
             for (int i = 0; i < 3; ++i) {

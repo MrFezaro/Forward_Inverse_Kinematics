@@ -1,7 +1,8 @@
 #include "uiManager.hpp"
+#include <cmath>
 #include <numbers>
 #include <string>
-#include <cstdlib>
+#include <windows.h>
 
 UiManager::UiManager(SceneManager &scene, ChainKinematics &chainKinematics)
     : scene_(scene), chainKinematics_(chainKinematics), ui_(scene.canvas.windowPtr(), [&] {
@@ -14,7 +15,8 @@ UiManager::UiManager(SceneManager &scene, ChainKinematics &chainKinematics)
           scene.controls.enabled = !(isHovered_ || isInteracting_);
       }) {}
 
-void UiManager::render() {
+void UiManager::render(const float dt) {
+    dt_ = dt;
     ui_.render();
 }
 
@@ -43,13 +45,12 @@ void UiManager::handleKinematics() {
 
     if (isForwardKinematics_) {
         for (int i = 0; i < 3; ++i) {
-            float angle = chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi);
+            float angle = chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi_v<float>);
             if (ImGui::SliderFloat(("Angle Joint " + std::to_string(i + 1)).c_str(), &angle, 0.0f, 360.0f)) {
                 chainKinematics_.setJointAngle(i, angle);
                 paramsChanged_ = true;
             }
         }
-
         auto [x, y] = chainKinematics_.forwardKinematics();
         chainKinematics_.setTarget({x, y});
         ImGui::Text("End Effector Position:");
@@ -70,7 +71,7 @@ void UiManager::handleKinematics() {
 
         ImGui::Text("Calculated Angles:");
         for (int i = 0; i < 3; ++i) {
-            ImGui::Text("Angle Joint %d: %.2f", i + 1, chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi));
+            ImGui::Text("Angle Joint %d: %.2f", i + 1, chainKinematics_.getJointAngle(i) * (180.0f / std::numbers::pi_v<float>));
         }
 
         if (!chainKinematics_.inverseKinematicsCCD()) {
@@ -120,18 +121,18 @@ void UiManager::handleAnimations() {
 void UiManager::updateAnimation() {
     float chainLength = 0.0f;
     for (int i = 0; i < 3; ++i) {
-        chainLength += chainKinematics_.getLinkLength(i) / 2.0f; // Halved to avoid the chain going out of bounds
+        chainLength += chainKinematics_.getLinkLength(i) / 2.0f; //Halved to avoid the chain going out of bounds
     }
     auto [x, y] = chainKinematics_.getTarget();
 
     const std::string url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUXbmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXA%3D";
 
-    animationTime_ += 0.02f; // Animation speed
+    animationTime_ += dt_; //Animation speed
 
     switch (currentAnimation_) {
-        case 0: // None
+        case 0: //None
             break;
-        case 1: // Square
+        case 1: //Square
             if (animationTime_ < 1.0f) {
                 const float t = animationTime_;
                 chainKinematics_.setTarget({chainLength * (1.0f - t) + (-chainLength * t),
@@ -152,24 +153,18 @@ void UiManager::updateAnimation() {
                 animationTime_ = 0.0f;
             }
             break;
-        case 2: // Sinus
-            chainKinematics_.setTarget({std::sin(animationTime_) * chainLength, animationTime_ - 3.14f});
+        case 2: //Sinus
+            chainKinematics_.setTarget({std::sin(animationTime_) * chainLength, animationTime_ - std::numbers::pi_v<float>});
             if (y > 3.14f) {
                 animationTime_ = 0.0f;
             }
             break;
-        case 3: // Circle
+        case 3: //Circle
             chainKinematics_.setTarget({(chainLength * std::cos(animationTime_)),
                                         (chainLength * std::sin(animationTime_))});
             break;
-        case 4: // Special
-            #ifdef _WIN32
-                 std::system(("start " + url).c_str());
-            #elif __APPLE__
-                 std::system(("open " + url).c_str());
-            #elif __linux__
-                 std::system(("xdg-open " + url).c_str());
-            #endif
+        case 4: //Special
+            ShellExecute(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOW);
             currentAnimation_ = 0;
             break;
         default:

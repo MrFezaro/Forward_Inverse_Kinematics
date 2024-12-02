@@ -2,8 +2,8 @@
 
 #### Candidate Number: 10053
 
-<div style="text-align: center;">
-  <img src="docs/assets/Program_demo.gif" alt="Demo">
+<div style="text-align: left;">
+  <img src="docs/assets/Program_demo.gif" alt="Demo" width="600" height="auto">
   <p>Full demo video <a href="https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming">here</a></p>
 </div>
 
@@ -26,6 +26,7 @@ threepp library. It provides a visual representation and control interface for m
 - Use the switch to toggle between forward and inverse kinematics.
 - Drag the sliders to adjust the joint angles og target position.
 - Click reset to set the arm to its initial position.
+- Play different animations in inverse kinematics mode using the drop down menu.
 
 ## Dependencies
 
@@ -36,7 +37,7 @@ threepp library. It provides a visual representation and control interface for m
 
 ## UML Class Diagram
 
-![UML Diagram](docs/assets/UML_Diagram.jpg)
+<img src="docs/assets/UML_Diagram.png" alt="UML Diagram" width="600" height="auto">
 
 ## Main Scripts
 
@@ -50,5 +51,4 @@ Make sure to have the following installed:
 - CMake 3.19 or later
 - A C++20 compatible compiler
 
-The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the
-`CMakeLists.txt` file.
+The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the `CMakeLists.txt` file.

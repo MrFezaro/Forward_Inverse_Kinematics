@@ -21,7 +21,7 @@ private:
     void createBase();
     void createJointsAndLinks();
     void createSphereAtEnd();
-    void applyInitialTransformations();
+    void applyInitialTransformations() const;
 
     static std::shared_ptr<threepp::Mesh> createJoint(const threepp::BoxGeometry::Params &params, const threepp::Color &color);
     static std::shared_ptr<threepp::Mesh> createLink(float length, float radius, const threepp::Color &color);

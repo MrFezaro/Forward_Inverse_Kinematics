@@ -12,7 +12,6 @@ int main() {
         UiManager ui(scene, kinematicChain);
         ChainGeometry chainGeometry(scene.scene, kinematicChain);
 
-        ui.render();
         chainGeometry.create();
         runAnimationLoop(scene, kinematicChain, ui, chainGeometry);
     } catch (const std::out_of_range &e) {

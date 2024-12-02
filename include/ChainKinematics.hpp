@@ -57,7 +57,7 @@ private:
      * @param angle The angle to normalize.
      * @return The normalized angle.
      */
-    [[nodiscard]] static float normalizeAngle(float angle);
+    static float normalizeAngle(float angle);
 
     /**
      * @brief Creates a transformation matrix for a given angle and length.
@@ -66,7 +66,7 @@ private:
      * @param length The length of the transformation.
      * @return The transformation matrix.
      */
-    [[nodiscard]] static std::vector<std::vector<float>> transformationMatrix(float angle, float length);
+    static std::vector<std::vector<float>> transformationMatrix(float angle, float length);
 
     /**
      * @brief Multiplies two matrices.
@@ -75,7 +75,7 @@ private:
      * @param B The second matrix.
      * @return The result of the matrix multiplication.
      */
-    [[nodiscard]] static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);
+    static std::vector<std::vector<float>> matrixMultiply(const std::vector<std::vector<float>> &A, const std::vector<std::vector<float>> &B);
 };
 
 #endif// KINEMATICCHAIN_HPP
