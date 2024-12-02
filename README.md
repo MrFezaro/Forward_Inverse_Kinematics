@@ -41,8 +41,8 @@ threepp library. It provides a visual representation and control interface for m
 
 ## Main Scripts
 
-- **main.cpp:** Entry point of the application, sets up the scene and handles user interaction through ImGui.
-- **testFunctions.cpp:**  Tests different functions for the chain kinematics class.
+- **main.cpp:** Entry point of the application, initializes the window and runs the main loop.
+- **testFunctions.cpp:**  Tests different functions for the ChainKinematics class.
 
 ## Additional Information
 
@@ -52,3 +52,5 @@ Make sure to have the following installed:
 - A C++20 compatible compiler
 
 The test functions can be disabled by setting `PROJECT_BUILD_TESTS` to `OFF` in the `CMakeLists.txt` file.
+
+Have fun exploring the kinematics of the robotic arm!

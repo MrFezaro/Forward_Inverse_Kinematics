@@ -11,8 +11,8 @@ UiManager::UiManager(SceneManager &scene, ChainKinematics &chainKinematics)
           handleLinkLengths();
           handleReset();
           handleAnimations();
-          ImGui::End();
           scene.controls.enabled = !(isHovered_ || isInteracting_);
+          ImGui::End();
       }) {}
 
 void UiManager::render(const float dt) {
