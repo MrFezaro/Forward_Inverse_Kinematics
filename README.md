@@ -1,7 +1,5 @@
 # Forward and Inverse Kinematics of a 3-DOF Arm
 
-#### Candidate Number: 10053
-
 <div style="text-align: left;">
   <img src="docs/assets/Program_demo.gif" alt="Demo" width="600" height="auto">
   <p>Full demo video <a href="https://www.youtube.com/watch?v=q4ilPCmvRKg&ab_channel=FezaroGaming">here</a></p>
